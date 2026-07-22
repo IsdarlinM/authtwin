@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "authtwin"
+version = "0.2.0"
+description = "Evidence-native authorization digital twin and invariant analysis."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+authors = [{name = "imr"}]
+dependencies = [
+  "fastapi>=0.128,<1",
+  "pydantic>=2.10,<3",
+  "typer>=0.15,<1",
+  "uvicorn>=0.34,<1",
+  "sric-core>=0.3,<0.4",
+]
+
+[project.optional-dependencies]
+rcap = ["reprosec>=0.3,<0.4"]
+dev = ["pytest>=8,<10", "httpx>=0.27,<1", "ruff>=0.9,<1", "mypy>=1.14,<2"]
+
+[project.scripts]
+authtwin = "authtwin.cli:run"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+packages = ["authtwin"]
+
+[tool.setuptools.package-data]
+authtwin = ["py.typed"]

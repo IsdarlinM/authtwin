@@ -1,0 +1,84 @@
+{
+  "actors": [
+    {
+      "actor_id": "alice",
+      "name": "Alice",
+      "roles": [
+        "member"
+      ],
+      "tenant": "acme",
+      "suspended": false,
+      "metadata": {}
+    },
+    {
+      "actor_id": "bob",
+      "name": "Bob",
+      "roles": [
+        "member"
+      ],
+      "tenant": "acme",
+      "suspended": false,
+      "metadata": {}
+    },
+    {
+      "actor_id": "admin",
+      "name": "Admin",
+      "roles": [
+        "admin"
+      ],
+      "tenant": "acme",
+      "suspended": false,
+      "metadata": {}
+    }
+  ],
+  "resources": [
+    {
+      "resource_id": "doc-001",
+      "resource_type": "document",
+      "owner_actor_id": "alice",
+      "tenant": "acme",
+      "state": "active",
+      "shared_with": [],
+      "metadata": {}
+    }
+  ],
+  "observations": [
+    {
+      "observation_id": "obs-001",
+      "actor_id": "alice",
+      "resource_id": "doc-001",
+      "operation": "READ",
+      "decision": "ALLOW",
+      "status_code": 200,
+      "evidence_ids": [
+        "EVD-001"
+      ],
+      "source": "synthetic_lab"
+    },
+    {
+      "observation_id": "obs-002",
+      "actor_id": "bob",
+      "resource_id": "doc-001",
+      "operation": "READ",
+      "decision": "DENY",
+      "status_code": 403,
+      "evidence_ids": [
+        "EVD-002"
+      ],
+      "source": "synthetic_lab"
+    }
+  ],
+  "invariants": [
+    {
+      "invariant_id": "inv-001",
+      "description": "A non-owner must not mutate an exclusively owned resource without an explicit relationship.",
+      "kind": "DENY_OTHER_OWNER_MUTATION",
+      "operations": [
+        "UPDATE",
+        "DELETE"
+      ],
+      "enabled": true,
+      "metadata": {}
+    }
+  ]
+}
