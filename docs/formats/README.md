@@ -1,3 +1,3 @@
 # Formats
 
-JSON is the stable interchange baseline for v0.1. Shared SRIC schemas and RCAP are preferred for cross-product evidence. Inputs are treated as hostile, size-bounded, schema-validated and never executed. Schema evolution follows explicit version fields and migration rules.
+Versioned JSON and shared SRIC schemas are the stable interchange baseline for v0.3; RCAP 0.3 is preferred for reproducible cross-product evidence where applicable. Inputs are treated as hostile data, size-bounded, schema-validated and never executed. Schema evolution requires explicit versions, provenance preservation and safe migrations.
