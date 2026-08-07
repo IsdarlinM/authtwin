@@ -60,8 +60,20 @@ def _list(value: Any) -> list[str]:
 
 
 def _hash(data: dict[str, Any]) -> str:
-    encoded = json.dumps(data, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    encoded = json.dumps(
+        data,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    )
     return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+
+def _policy_effect(value: Any) -> PolicyEffect:
+    try:
+        return PolicyEffect(str(value).upper())
+    except ValueError:
+        return PolicyEffect.UNKNOWN
 
 
 def _aws_rules(
@@ -75,25 +87,24 @@ def _aws_rules(
         statements = [statements]
     if not isinstance(statements, list):
         return [], unknown, ["AWS IAM Statement must be an object or list"]
+
     rules: list[NormalizedPolicyRule] = []
     for index, raw in enumerate(statements):
         if not isinstance(raw, dict):
             errors.append(f"Statement[{index}] is not an object")
             continue
-        effect_raw = str(raw.get("Effect", "UNKNOWN")).upper()
-        effect = PolicyEffect(effect_raw) if effect_raw in PolicyEffect else PolicyEffect.UNKNOWN
-        subjects = _list(raw.get("Principal") or raw.get("NotPrincipal"))
-        actions = _list(raw.get("Action") or raw.get("NotAction"))
-        resources = _list(raw.get("Resource") or raw.get("NotResource"))
+        condition = raw.get("Condition", {})
+        if not isinstance(condition, dict):
+            condition = {}
         rules.append(
             NormalizedPolicyRule(
                 rule_id=str(raw.get("Sid") or f"AWS-{index:04d}"),
                 provider=PolicyProvider.AWS_IAM,
-                effect=effect,
-                subjects=subjects,
-                actions=actions,
-                resources=resources,
-                conditions=raw.get("Condition", {}) if isinstance(raw.get("Condition", {}), dict) else {},
+                effect=_policy_effect(raw.get("Effect", "UNKNOWN")),
+                subjects=_list(raw.get("Principal") or raw.get("NotPrincipal")),
+                actions=_list(raw.get("Action") or raw.get("NotAction")),
+                resources=_list(raw.get("Resource") or raw.get("NotResource")),
+                conditions=condition,
                 source_path=f"Statement[{index}]",
                 evidence_ids=evidence_ids,
             )
@@ -108,24 +119,39 @@ def _kubernetes_rules(
     unknown = sorted(set(data) - allowed)
     errors: list[str] = []
     kind = str(data.get("kind", ""))
-    if kind not in {"Role", "ClusterRole", "RoleBinding", "ClusterRoleBinding"}:
+    supported = {"Role", "ClusterRole", "RoleBinding", "ClusterRoleBinding"}
+    if kind not in supported:
         errors.append("Unsupported Kubernetes RBAC kind")
         return [], unknown, errors
+
+    metadata = data.get("metadata", {})
+    if not isinstance(metadata, dict):
+        metadata = {}
+
     if kind in {"RoleBinding", "ClusterRoleBinding"}:
+        raw_subjects = data.get("subjects", [])
+        if not isinstance(raw_subjects, list):
+            raw_subjects = []
+            errors.append("Kubernetes subjects must be a list")
         subjects = [
             f"{item.get('kind', 'Unknown')}:{item.get('namespace', '')}:{item.get('name', '')}"
-            for item in data.get("subjects", [])
+            for item in raw_subjects
             if isinstance(item, dict)
         ]
-        role_ref = data.get("roleRef", {}) if isinstance(data.get("roleRef"), dict) else {}
+        role_ref = data.get("roleRef", {})
+        if not isinstance(role_ref, dict):
+            role_ref = {}
+            errors.append("Kubernetes roleRef must be an object")
         return [
             NormalizedPolicyRule(
-                rule_id=f"{kind}:{data.get('metadata', {}).get('name', 'unnamed')}",
+                rule_id=f"{kind}:{metadata.get('name', 'unnamed')}",
                 provider=PolicyProvider.KUBERNETES_RBAC,
                 effect=PolicyEffect.ALLOW,
                 subjects=subjects,
                 actions=["bind"],
-                resources=[f"{role_ref.get('kind', 'Role')}:{role_ref.get('name', '')}"],
+                resources=[
+                    f"{role_ref.get('kind', 'Role')}:{role_ref.get('name', '')}"
+                ],
                 source_path="roleRef",
                 evidence_ids=evidence_ids,
             )
@@ -139,19 +165,19 @@ def _kubernetes_rules(
         if not isinstance(raw, dict):
             errors.append(f"rules[{index}] is not an object")
             continue
-        resources = _list(raw.get("resources")) + _list(raw.get("resourceNames")) + _list(raw.get("nonResourceURLs"))
-        actions = _list(raw.get("verbs"))
-        conditions = {
-            "apiGroups": _list(raw.get("apiGroups")),
-        }
+        resources = (
+            _list(raw.get("resources"))
+            + _list(raw.get("resourceNames"))
+            + _list(raw.get("nonResourceURLs"))
+        )
         rules.append(
             NormalizedPolicyRule(
                 rule_id=f"{kind}-{index:04d}",
                 provider=PolicyProvider.KUBERNETES_RBAC,
                 effect=PolicyEffect.ALLOW,
-                actions=actions,
+                actions=_list(raw.get("verbs")),
                 resources=resources,
-                conditions=conditions,
+                conditions={"apiGroups": _list(raw.get("apiGroups"))},
                 source_path=f"rules[{index}]",
                 evidence_ids=evidence_ids,
             )
@@ -167,6 +193,7 @@ def _openfga_rules(
     tuples = data.get("tuples", [])
     if not isinstance(tuples, list):
         return [], unknown, ["OpenFGA tuples must be a list"]
+
     rules: list[NormalizedPolicyRule] = []
     errors: list[str] = []
     for index, raw in enumerate(tuples):
@@ -209,10 +236,15 @@ def normalize_policy_export(
     elif provider is PolicyProvider.OPENFGA:
         rules, unknown, errors = _openfga_rules(data, evidence)
     else:
-        rules, unknown, errors = [], sorted(data), ["Generic provider requires an explicit adapter"]
+        rules = []
+        unknown = sorted(data)
+        errors = ["Generic provider requires an explicit adapter"]
+
     warnings: list[str] = []
     if unknown:
-        warnings.append("Unknown top-level fields were preserved in the import report and not silently interpreted.")
+        warnings.append(
+            "Unknown top-level fields were preserved in the import report and not silently interpreted."
+        )
     if not evidence:
         warnings.append("No evidence IDs were attached to the imported configuration.")
     return PolicyImportReport(
