@@ -13,6 +13,11 @@ def utcnow() -> datetime:
     return datetime.now(timezone.utc)
 
 
+def _require_aware(value: datetime, field: str) -> None:
+    if value.tzinfo is None or value.utcoffset() is None:
+        raise ValueError(f"{field} must be timezone-aware")
+
+
 class AccessDecision(StrEnum):
     ALLOW = "ALLOW"
     DENY = "DENY"
@@ -38,6 +43,7 @@ class GraphQLFieldObservation(BaseModel):
 
     @model_validator(mode="after")
     def observed_decisions_require_evidence(self) -> "GraphQLFieldObservation":
+        _require_aware(self.observed_at, "observed_at")
         if self.decision is not AccessDecision.UNKNOWN and not self.evidence_ids:
             raise ValueError("ALLOW/DENY field observations require evidence_ids")
         return self
@@ -78,17 +84,17 @@ def compare_graphql_fields(
         grouped[key].append(item)
 
     output: list[GraphQLFieldComparison] = []
-    for key in sorted(grouped, key=lambda item: tuple("" if value is None else value for value in item)):
+    for key in sorted(
+        grouped,
+        key=lambda item: tuple("" if value is None else value for value in item),
+    ):
         values = grouped[key]
         actor_decisions: dict[str, AccessDecision] = {}
-        conflicting_actors: list[str] = []
         for actor_id in sorted({item.actor_id for item in values}):
             decisions = {item.decision for item in values if item.actor_id == actor_id}
-            if len(decisions) == 1:
-                actor_decisions[actor_id] = next(iter(decisions))
-            else:
-                actor_decisions[actor_id] = AccessDecision.UNKNOWN
-                conflicting_actors.append(actor_id)
+            actor_decisions[actor_id] = (
+                next(iter(decisions)) if len(decisions) == 1 else AccessDecision.UNKNOWN
+            )
 
         missing: list[str] = []
         if len(actor_decisions) < 2:
@@ -128,7 +134,7 @@ def compare_graphql_fields(
                 missing_evidence=sorted(set(missing)),
                 limitations=[
                     "Different field decisions are not proof of improper authorization; roles, ownership and policy intent must be evaluated.",
-                    "Response-shape differences, resolver errors and masking behavior require deterministic controls."
+                    "Response-shape differences, resolver errors and masking behavior require deterministic controls.",
                 ],
             )
         )
@@ -155,6 +161,9 @@ class SubscriptionEventObservation(BaseModel):
 
     @model_validator(mode="after")
     def received_events_require_evidence(self) -> "SubscriptionEventObservation":
+        _require_aware(self.received_at, "received_at")
+        if self.revocation_observed_at is not None:
+            _require_aware(self.revocation_observed_at, "revocation_observed_at")
         if self.received_payload and not self.evidence_ids:
             raise ValueError("received subscription events require evidence_ids")
         return self
@@ -194,14 +203,22 @@ def assess_subscription_revocation(
             if item.revocation_observed_at is not None
         ]
         missing: list[str] = []
+        unique_revocations = set(revocations)
         if not revocations:
             missing.append("evidence-bearing revocation timestamp")
             revocation = None
+        elif len(unique_revocations) > 1:
+            missing.append("consistent revocation timestamp")
+            revocation = min(unique_revocations)
         else:
-            revocation = min(revocations)
+            revocation = revocations[0]
 
         before = [
-            item for item in values if revocation is not None and item.received_at < revocation
+            item
+            for item in values
+            if revocation is not None
+            and item.received_at < revocation
+            and item.received_payload
         ]
         after = [
             item
@@ -216,7 +233,7 @@ def assess_subscription_revocation(
         if any(item.connection_reestablished for item in after):
             alternatives.append("The connection may have been reestablished under new authorization state.")
         if after and not before:
-            missing.append("pre-revocation control event")
+            missing.append("pre-revocation payload control event")
 
         if missing:
             status = ClaimStatus.UNKNOWN
