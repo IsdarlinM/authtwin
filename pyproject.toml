@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "authtwin"
-version = "0.3.0"
+version = "0.3.1"
 description = "Evidence-native authorization digital twin and invariant analysis."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -15,15 +15,22 @@ dependencies = [
   "pydantic>=2.10,<3",
   "typer>=0.15,<1",
   "uvicorn>=0.34,<1",
-  "sric-core>=0.4,<0.5",
+  "sric-core>=0.4.1,<0.5",
 ]
 
 [project.optional-dependencies]
-rcap = ["reprosec>=0.4,<0.5"]
-dev = ["pytest>=8,<10", "httpx>=0.27,<1", "ruff>=0.9,<1", "mypy>=1.14,<2"]
+rcap = ["reprosec>=0.4.1,<0.5"]
+dev = [
+  "pytest>=8,<10",
+  "httpx>=0.27,<1",
+  "ruff>=0.9,<1",
+  "mypy>=1.14,<2",
+  "build>=1,<2",
+  "pip-audit>=2,<3",
+]
 
 [project.scripts]
-authtwin = "authtwin.cli_vnext:run"
+authtwin = "authtwin.cli_all:run"
 
 [tool.setuptools.packages.find]
 where = ["src"]

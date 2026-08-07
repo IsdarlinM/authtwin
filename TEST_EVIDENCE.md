@@ -1,21 +1,40 @@
-# Test Evidence — authtwin v0.3.0
+# Test Evidence — AuthTwin v0.3.1
 
-Validated on 2026-07-22 as part of the Sentinel Forge vNext release gate.
+## QA pass — 2026-08-07
 
-- pytest: **21 tests passed**
-- Python compileall: **PASS**
-- project security scan: **PASS**
-- CLI registered-command help coverage: **PASS** (`--help`, `-h`; **46 registered AuthTwin command paths**)
-- synthetic/local functional smoke: **PASS**
-- YAML parse validation: **PASS** as part of the 42-file ecosystem gate
-- wheel build: **PASS**
-- isolated wheel smoke against the validated runtime dependency layer: **PASS**
+Freshly executed in the current local runtime:
 
-Ecosystem-wide validated totals: **208 tests passed** across six repositories and **263 registered CLI command paths** passed `--help`/`-h` coverage.
+- Sentinel Forge cross-product high-risk regression matrix including AuthTwin GraphQL field comparison and subscription-revocation controls: **7/7 matrix tests passed**;
+- Python `compileall` over the reconstructed corrected modules: **PASS**;
+- branch comparison against `main`: branch is ahead and **0 commits behind** at the time of this audit.
 
-## Explicit environment limitations
+Current-source review and new regression coverage include:
 
-- Fresh dependency-resolving installation was blocked by the environment package index lacking required current dependencies such as `fastapi>=0.128`; wheel construction passed.
-- Ruff, mypy and pip-audit were unavailable from the local runtime/index for a fresh rerun; CI remains configured to run them where dependencies are available.
-- Windows `.cmd` installers were not executable in this Linux runtime; Linux shell installer syntax was validated with `sh -n`.
-- Real-browser E2E is not claimed from this runtime; API/Web/CSP/MIME integration tests are covered by automated suites.
+- `INTENDED` / `CONFIGURED` / `OBSERVED` separation;
+- field-level GraphQL comparison without automatic bypass findings;
+- pre-revocation payload control requirements;
+- conflicting revocation timestamps remaining `UNKNOWN`;
+- timezone-aware observation validation;
+- policy-import and coverage APIs through the final workspace-bound vNext app;
+- complete CLI entrypoint registration for GraphQL/subscription commands;
+- recursive help-path coverage and controlled CLI validation errors;
+- `authtwin web` serving the same vNext API used by integration tests;
+- Web root/CSP smoke and public Python exports for surface analysis.
+
+## Current release-gate status
+
+**FULL CURRENT REPOSITORY GATE NOT EXECUTABLE IN THIS RUNTIME.**
+
+The private repository cannot be materialized as a complete local checkout from the connector, and Ruff, mypy, `build` and `pip-audit` are unavailable from the runtime/index. No GitHub Actions, Codespaces or paid/hosted GitHub execution was used.
+
+Before treating v0.3.1 as a fully validated release, run the exact commit from a local sibling checkout:
+
+```bash
+python -m pip install -e ../sric-core
+python -m pip install -e '.[dev]'
+python scripts/release-gate.py
+```
+
+## Previous validated baseline
+
+The previous v0.3.0 state was recorded on 2026-07-22 with **21 pytest tests passed**, compileall/security scan/CLI help/synthetic smoke/build/isolated wheel smoke PASS. Those results are a historical baseline only.
