@@ -25,24 +25,16 @@ def _read_list(path: Path) -> list[object]:
     return raw
 
 
-def _validate_items(model: type[GraphQLFieldObservation] | type[SubscriptionEventObservation], path: Path) -> list[GraphQLFieldObservation] | list[SubscriptionEventObservation]:
-    try:
-        return [model.model_validate(item) for item in _read_list(path)]
-    except ValidationError as exc:
-        typer.echo(f"invalid authorization-surface input: {exc}", err=True)
-        raise typer.Exit(2) from exc
-
-
 @app.command("graphql-fields")
 def graphql_fields(path: Path) -> None:
     """Compare field-level GraphQL decisions in equivalent contexts."""
-    observations = [
-        GraphQLFieldObservation.model_validate(item) for item in _read_list(path)
-    ]
     try:
+        observations = [
+            GraphQLFieldObservation.model_validate(item) for item in _read_list(path)
+        ]
         reports = compare_graphql_fields(observations)
-    except ValueError as exc:
-        typer.echo(str(exc), err=True)
+    except (ValidationError, ValueError) as exc:
+        typer.echo(f"invalid GraphQL authorization input: {exc}", err=True)
         raise typer.Exit(2) from exc
     typer.echo(
         json.dumps(
@@ -60,10 +52,10 @@ def subscription_revocation(path: Path) -> None:
         observations = [
             SubscriptionEventObservation.model_validate(item) for item in _read_list(path)
         ]
-    except ValidationError as exc:
+        reports = assess_subscription_revocation(observations)
+    except (ValidationError, ValueError) as exc:
         typer.echo(f"invalid subscription observation: {exc}", err=True)
         raise typer.Exit(2) from exc
-    reports = assess_subscription_revocation(observations)
     typer.echo(
         json.dumps(
             [item.model_dump(mode="json") for item in reports],
