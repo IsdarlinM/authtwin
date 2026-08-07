@@ -30,7 +30,7 @@ dev = [
 ]
 
 [project.scripts]
-authtwin = "authtwin.cli_vnext:run"
+authtwin = "authtwin.cli_all:run"
 
 [tool.setuptools.packages.find]
 where = ["src"]
