@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.1 - 2026-08-06
+- Added explicit `INTENDED`, `CONFIGURED` and `OBSERVED` authorization evidence layers.
+- Added conservative comparison of policy intent, deployed configuration and runtime enforcement.
+- Configuration, enforcement and behavioral drift remain `HYPOTHESIS`; missing or contradictory layers remain `UNKNOWN`.
+- Added tenant, resource state and actor state to comparison keys to prevent invalid cross-state comparisons.
+- Added SRIC 0.4.1 confidence calibration and Skeptic review with alternative explanations and counter-evidence.
+- Added tests for incomplete evidence, contradictory observations, tenant isolation, state separation and non-validation semantics.
+- Replaced hosted GitHub Actions/Dependabot automation with a local reproducible release gate.
+
 ## 0.3.0 - 2026-07-22
 - Added authorization discovery v2, endpoint/resource-family normalization and conservative actor-resource binding.
 - Added actor/resource/membership state machine v2, safe mutation plans, differential response intelligence and reusable invariant library.
