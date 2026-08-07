@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from fastapi import APIRouter, FastAPI
 from pydantic import BaseModel, ConfigDict
 
@@ -14,13 +16,11 @@ from .surfaces import (
 
 class GraphQLFieldRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
-
     observations: list[GraphQLFieldObservation]
 
 
 class SubscriptionRevocationRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
-
     observations: list[SubscriptionEventObservation]
 
 
@@ -47,7 +47,7 @@ async def subscription_revocation(
     }
 
 
-def create_app() -> FastAPI:
-    app = create_base_app()
+def create_app(workspace: Path) -> FastAPI:
+    app = create_base_app(workspace)
     app.include_router(router)
     return app
