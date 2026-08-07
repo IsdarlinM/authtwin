@@ -1,11 +1,16 @@
+from pathlib import Path
+
 from fastapi.testclient import TestClient
 
-from authtwin.api import create_app
+from authtwin.api_vnext import create_app
 
 
-def test_policy_import_api_is_configured_only() -> None:
-    client = TestClient(create_app())
-    response = client.post(
+def client(tmp_path: Path) -> TestClient:
+    return TestClient(create_app(tmp_path))
+
+
+def test_policy_import_api_is_configured_only(tmp_path: Path) -> None:
+    response = client(tmp_path).post(
         "/api/v1/policy/import",
         json={
             "provider": "AWS_IAM",
@@ -22,7 +27,6 @@ def test_policy_import_api_is_configured_only() -> None:
             },
         },
     )
-
     assert response.status_code == 200
     payload = response.json()
     assert payload["configured_only"] is True
@@ -30,9 +34,8 @@ def test_policy_import_api_is_configured_only() -> None:
     assert "does not prove runtime" in payload["limitations"][0]
 
 
-def test_unknown_coverage_api_has_no_risk_or_findings() -> None:
-    client = TestClient(create_app())
-    response = client.post(
+def test_unknown_coverage_api_has_no_risk_or_findings(tmp_path: Path) -> None:
+    response = client(tmp_path).post(
         "/api/v1/coverage/prioritize",
         json={
             "cells": [
@@ -49,7 +52,6 @@ def test_unknown_coverage_api_has_no_risk_or_findings() -> None:
             ]
         },
     )
-
     assert response.status_code == 200
     payload = response.json()
     assert payload["risk_score"] is None
@@ -57,9 +59,8 @@ def test_unknown_coverage_api_has_no_risk_or_findings() -> None:
     assert payload["priorities"][0]["status"] == "UNKNOWN"
 
 
-def test_invalid_policy_shape_fails_closed_in_report() -> None:
-    client = TestClient(create_app())
-    response = client.post(
+def test_invalid_policy_shape_fails_closed_in_report(tmp_path: Path) -> None:
+    response = client(tmp_path).post(
         "/api/v1/policy/import",
         json={
             "provider": "OPENFGA",
@@ -67,8 +68,14 @@ def test_invalid_policy_shape_fails_closed_in_report() -> None:
             "data": {"tuples": "not-a-list"},
         },
     )
-
     assert response.status_code == 200
     payload = response.json()
     assert payload["errors"]
     assert payload["rules"] == []
+
+
+def test_vnext_web_root_and_csp(tmp_path: Path) -> None:
+    response = client(tmp_path).get("/")
+    assert response.status_code == 200
+    assert "AuthTwin" in response.text
+    assert "default-src 'self'" in response.headers["content-security-policy"]
