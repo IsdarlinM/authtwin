@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.1 - 2026-08-08
+- Fixed clean installation when `sric-core` is not published on PyPI.
+- Added a first-party dependency manifest pinned to the exact SRIC Core 0.5.1 GitHub commit.
+- Windows and Linux installers now bootstrap first-party dependencies before AuthTwin and its third-party runtime dependencies.
+- Preserved ReproSec as an optional `rcap` extra and did not make sibling products mandatory.
+- Updated the SRIC dependency floor/runtime lock to 0.5.1 and the optional ReproSec compatibility range to 0.5.1.
+- Added standalone regression coverage for the installer dependency contract.
+
 ## 0.5.0 - 2026-08-08
 - Added coverage-guided validation planning that compresses equivalent `UNKNOWN` authorization cells into representative experiments.
 - Added deterministic cross-tool claim fingerprints for planned authorization coverage gaps.
