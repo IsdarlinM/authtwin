@@ -28,8 +28,10 @@ class AuthorizationValidationPlan(BaseModel):
 
 
 def _equivalence_key(cell: UnknownAuthorizationCell) -> tuple[object, ...]:
+    resource_equivalence = cell.equivalence_class or f"resource:{cell.resource_id}"
     return (
         cell.tenant_id,
+        resource_equivalence,
         cell.resource_sensitivity,
         cell.operation.upper(),
         cell.crosses_tenant_boundary,
@@ -46,8 +48,10 @@ def build_validation_plan(
 ) -> list[AuthorizationValidationPlan]:
     """Compress authorization coverage gaps into representative safe experiments.
 
-    Cells are grouped only by explicit authorization dimensions. The planner never changes
-    an UNKNOWN cell into a finding and never treats research priority as exploitability.
+    Cells are compressed across different resources only when the caller supplies an explicit
+    `equivalence_class`. Without that evidence, resource IDs are treated independently. The
+    planner never changes an UNKNOWN cell into a finding and never treats research priority as
+    exploitability.
     """
 
     if max_experiments < 1:
@@ -77,7 +81,7 @@ def build_validation_plan(
             claim_type="authorization-coverage-gap",
             subject=representative.actor_id,
             predicate=representative.operation,
-            object_value=representative.resource_id,
+            object_value=representative.equivalence_class or representative.resource_id,
             context={
                 "tenant_id": representative.tenant_id,
                 "crosses_tenant_boundary": representative.crosses_tenant_boundary,
@@ -96,7 +100,7 @@ def build_validation_plan(
                 claim_fingerprint=fingerprint,
                 reasons=[
                     *priority.reasons,
-                    f"Representative covers {len(group)} equivalent UNKNOWN matrix cell(s).",
+                    f"Representative covers {len(group)} explicitly equivalent UNKNOWN matrix cell(s).",
                     "The plan is a research-coverage optimization, not a vulnerability claim.",
                 ],
             )
