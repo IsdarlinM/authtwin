@@ -13,31 +13,16 @@ import tempfile
 import time
 import tomllib
 from pathlib import Path
+from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "build" / "release-evidence"
 
 
-def run(name: str, command: list[str], *, cwd: Path = ROOT) -> dict[str, object]:
+def run(name: str, command: list[str]) -> dict[str, object]:
     started = time.monotonic()
-    process = subprocess.run(
-        command,
-        cwd=cwd,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        check=False,
-    )
-    return {
-        "name": name,
-        "command": command,
-        "status": "PASS" if process.returncode == 0 else "FAIL",
-        "returncode": process.returncode,
-        "duration_seconds": round(time.monotonic() - started, 3),
-        "output_tail": "\n".join((process.stdout or "").splitlines()[-80:]),
-    }
+    process = subprocess.run(command, cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding="utf-8", errors="replace", check=False)
+    return {"name": name, "command": command, "status": "PASS" if process.returncode == 0 else "FAIL", "returncode": process.returncode, "duration_seconds": round(time.monotonic() - started, 3), "output_tail": "\n".join((process.stdout or "").splitlines()[-80:])}
 
 
 def require(*modules: str) -> None:
@@ -57,7 +42,26 @@ def digest(path: Path) -> str:
 def project_metadata() -> tuple[str, str, list[str]]:
     data = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
     project = data["project"]
-    return project["name"], project["version"], sorted(project.get("scripts", {}))
+    return project["name"], project["version"], sorted((project.get("scripts") or {}).keys())
+
+
+def source_identity() -> dict[str, Any]:
+    identity: dict[str, Any] = {"commit_sha": None, "tree_sha": None, "dirty": None}
+    if not shutil.which("git") or not (ROOT / ".git").exists():
+        identity["note"] = "Git metadata unavailable in this execution environment."
+        return identity
+
+    def capture(*args: str) -> str:
+        process = subprocess.run(["git", *args], cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8", errors="replace", check=True)
+        return process.stdout.strip()
+
+    try:
+        identity["commit_sha"] = capture("rev-parse", "HEAD")
+        identity["tree_sha"] = capture("rev-parse", "HEAD^{tree}")
+        identity["dirty"] = bool(capture("status", "--porcelain"))
+    except (OSError, subprocess.CalledProcessError) as exc:
+        identity["note"] = f"Unable to resolve Git source identity: {exc}"
+    return identity
 
 
 def wheel_smoke(wheel: Path, scripts: list[str], *, offline: bool) -> list[dict[str, object]]:
@@ -85,7 +89,7 @@ def wheel_smoke(wheel: Path, scripts: list[str], *, offline: bool) -> list[dict[
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Local Sentinel Forge release gate")
-    parser.add_argument("--quick", action="store_true", help="Skip audit, build and wheel smoke")
+    parser.add_argument("--quick", action="store_true", help="Skip audit, build, SBOM and wheel smoke")
     parser.add_argument("--offline", action="store_true", help="Install the wheel with --no-deps")
     args = parser.parse_args()
     if sys.version_info < (3, 11):
@@ -96,18 +100,13 @@ def main() -> int:
     checks: list[dict[str, object]] = []
     if shutil.which("git") and (ROOT / ".git").exists():
         checks.append(run("git diff --check", ["git", "diff", "--check"]))
-    checks.extend(
-        [
-            run("compileall", [sys.executable, "-m", "compileall", "-q", "src", "tests"]),
-            run("ruff", [sys.executable, "-m", "ruff", "check", "src", "tests"]),
-            run("mypy", [sys.executable, "-m", "mypy", "--strict", "src"]),
-            run("pytest", [sys.executable, "-m", "pytest", "-q"]),
-        ]
-    )
-    for name, path in (
-        ("security scan", ROOT / "scripts" / "security-scan.py"),
-        ("safety evaluations", ROOT / "scripts" / "run-evals.py"),
-    ):
+    checks.extend([
+        run("compileall", [sys.executable, "-m", "compileall", "-q", "src", "tests"]),
+        run("ruff", [sys.executable, "-m", "ruff", "check", "src", "tests"]),
+        run("mypy", [sys.executable, "-m", "mypy", "--strict", "src"]),
+        run("pytest", [sys.executable, "-m", "pytest", "-q"]),
+    ])
+    for name, path in (("security scan", ROOT / "scripts" / "security-scan.py"), ("safety evaluations", ROOT / "scripts" / "run-evals.py")):
         if path.exists():
             checks.append(run(name, [sys.executable, str(path)]))
 
@@ -133,16 +132,7 @@ def main() -> int:
 
     OUT.mkdir(parents=True, exist_ok=True)
     status = "PASS" if all(item["status"] == "PASS" for item in checks) else "FAIL"
-    report = {
-        "schema": "sentinel-forge.local-release-gate.v1",
-        "project": project,
-        "version": version,
-        "python": sys.version,
-        "platform": sys.platform,
-        "status": status,
-        "checks": checks,
-        "artifacts": artifacts,
-    }
+    report = {"schema": "sentinel-forge.local-release-gate.v2", "project": project, "version": version, "source": source_identity(), "python": sys.version, "platform": sys.platform, "status": status, "checks": checks, "artifacts": artifacts}
     report_path = OUT / "release-gate.json"
     report_path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     for item in checks:
