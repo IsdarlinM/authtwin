@@ -3,6 +3,7 @@ from __future__ import annotations
 import sys
 
 from . import cli as _base_cli
+from . import cli_research as _cli_research  # noqa: F401
 from . import cli_surfaces as _cli_surfaces  # noqa: F401
 from .api_vnext import create_app as create_vnext_app
 from .cli_vnext import app
