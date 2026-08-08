@@ -2,12 +2,23 @@
 
 ```text
 AuthTwin
-imr :: v0.3.1
+imr :: v0.5.0
 ```
 
 Authorization Digital Twin for modeling **who can do what, to which resource, in which state**, while preserving `UNKNOWN` instead of inventing findings.
 
 > **AI proposes. Evidence proves. Humans control.**
+
+## Standalone by design
+
+AuthTwin is independently installable and independently useful. It requires SRIC Core 0.5.x for shared evidence/workspace/policy primitives, but no other Sentinel Forge product is required.
+
+ReproSec interoperability is optional through the `rcap` extra. Its absence must never prevent AuthTwin from starting, modeling authorization, using the CLI, serving the Web UI or generating reports.
+
+```bash
+authtwin doctor --json
+authtwin capabilities
+```
 
 ## Implemented
 
@@ -17,51 +28,74 @@ Authorization Digital Twin for modeling **who can do what, to which resource, in
 - configurable authorization invariants and candidate-finding generation;
 - differential actor comparison and Skeptic-style alternative explanations;
 - explicit validation gate: a finding cannot become `VALIDATED` without deterministic evidence;
-- JSON import/export and conservative RCAP interoperability through ReproSec;
+- optional RCAP interoperability through ReproSec;
 - measurable coverage, safe counterfactual plans and state/session lifecycle modeling;
 - strict invariant DSL, GraphQL/batch analysis and WebSocket lifecycle modeling;
+- coverage-guided validation planning with explicit equivalence classes;
 - endpoint/resource-family normalization and conservative actor-resource bindings;
-- shared SRIC 0.4.1 workspace, graph, jobs/SSE, lineage, notebook/search and confidence calibration;
+- SRIC 0.5.x graph, jobs/SSE, lineage, notebook/search and confidence primitives;
 - local FastAPI API, responsive Web UI and offline synthetic demo.
 
-## Authorization evidence layers in v0.3.1
+## Authorization evidence layers
 
-AuthTwin now separates:
+AuthTwin separates `INTENDED`, `CONFIGURED` and `OBSERVED`. A mismatch is not automatically an authorization bypass. Missing or contradictory evidence remains `UNKNOWN`; deterministic evidence is required before validation.
 
-- `INTENDED`: documented or declared policy;
-- `CONFIGURED`: deployed authorization configuration;
-- `OBSERVED`: runtime behavior backed by direct evidence.
+## Standalone install
 
-A mismatch between layers is not automatically an authorization bypass. Configuration drift, enforcement drift and behavioral drift remain `HYPOTHESIS`. Missing or contradictory layer evidence produces `UNKNOWN`. Comparisons include tenant, actor state and resource state so observations from different contexts are not combined incorrectly.
+Linux:
+
+```bash
+./scripts/install-linux.sh
+authtwin doctor --json
+authtwin capabilities
+```
+
+Windows:
+
+```cmd
+scripts\install-windows.cmd
+authtwin doctor --json
+authtwin capabilities
+```
+
+The installer resolves SRIC automatically. `SRIC_CORE_SOURCE` exists only as an explicit development/release-validation override.
+
+For optional RCAP interoperability in a package environment:
+
+```bash
+python -m pip install 'authtwin[rcap]'
+```
 
 ## Five-minute start
 
 ```bash
-authtwin doctor
+authtwin doctor --json
+authtwin capabilities
 authtwin demo --workspace demo
 authtwin matrix demo
 authtwin findings demo
 authtwin web demo
 ```
 
-## Local release gate
+## Web and API
 
-AuthTwin does not require hosted CI:
+AuthTwin's local Web UI exposes the authorization matrix, coverage, counterfactual plans, evidence detail, search and real-time job state. It is a structured application UI, **not an operating-system web shell**.
+
+## Validation gates
 
 ```bash
-python -m pip install -e ../sric-core
-python -m pip install -e '.[dev]'
+python -m sric.standalone_gate --root .
 python scripts/release-gate.py
 ```
 
-The release gate writes machine-readable evidence to `build/release-evidence/release-gate.json`. No release is complete without a full `PASS` report for the exact commit.
+Standalone and full release evidence are written below `build/release-evidence/`. A release is complete only when evidence for the exact commit is PASS.
 
-## Evidence semantics
+## Uninstall
 
-`ALLOW`, `DENY` and `UNKNOWN` describe observations or model gaps. A `HYPOTHESIS` is not a vulnerability. Only deterministic validation with explicit evidence can create a `VALIDATED` result.
+```bash
+./scripts/uninstall-linux.sh
+```
 
-## Safety and privacy
+The runtime is removed while workspaces, configuration and evidence under `~/.authtwin/` are preserved.
 
-Use only on systems/data you own or are authorized to assess. Cloud AI, telemetry and external uploads are off by default. Non-loopback Web UI binding is refused until authenticated TLS deployment exists.
-
-See `docs/` and `ROADMAP.md` for architecture, security, CLI, formats, integrations and deferred work. Apache-2.0.
+Use only on systems/data you own or are authorized to assess. Cloud AI, telemetry and external uploads are OFF by default. Apache-2.0.
