@@ -1,8 +1,10 @@
 # AuthTwin
 
 ```text
-AuthTwin
-IsdarlinM :: v0.5.2
+AuthTwin :: v0.5.2
+Developer: IsdarlinM
+
+Model authorization behavior, invariants, and differential evidence.
 ```
 
 Authorization Digital Twin for modeling **who can do what, to which resource, in which state**, while preserving `UNKNOWN` instead of inventing findings.
@@ -69,7 +71,7 @@ python -m pip install 'authtwin[rcap]'
 
 ## CLI presentation
 
-Interactive terminals display a compact subdued-green banner with a short authorization-modeling description and `IsdarlinM :: v0.5.2`. Use `authtwin --no-color COMMAND`, `authtwin COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON and redirected stdout remain clean. See `docs/cli-presentation.md`.
+Interactive terminals display a compact subdued-green banner ordered as `AuthTwin :: v0.5.2`, `Developer: IsdarlinM`, then the authorization-modeling purpose statement. Use `authtwin --no-color COMMAND`, `authtwin COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON and redirected stdout remain clean. See `docs/cli-presentation.md`.
 
 ## Five-minute start
 
