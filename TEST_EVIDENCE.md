@@ -1,40 +1,32 @@
-# Test Evidence — AuthTwin v0.3.1
+# Test Evidence — AuthTwin v0.5.0 Release Candidate
 
-## QA pass — 2026-08-07
+## Release-candidate review — 2026-08-08
 
-Freshly executed in the current local runtime:
+The `agent/release-0.5.0` branch contains the AuthTwin 0.5 changes under review:
 
-- Sentinel Forge cross-product high-risk regression matrix including AuthTwin GraphQL field comparison and subscription-revocation controls: **7/7 matrix tests passed**;
-- Python `compileall` over the reconstructed corrected modules: **PASS**;
-- branch comparison against `main`: branch is ahead and **0 commits behind** at the time of this audit.
+- SRIC/ReproSec 0.5 compatibility;
+- coverage-guided authorization validation planning;
+- explicit equivalence classes before different resources may share one representative experiment;
+- safe-only planning by default while all unobserved cells remain `UNKNOWN`;
+- deterministic cross-tool claim fingerprints;
+- 0.5 regression tests and standardized release-evidence gate v2.
 
-Current-source review and new regression coverage include:
+## Fresh execution status
 
-- `INTENDED` / `CONFIGURED` / `OBSERVED` separation;
-- field-level GraphQL comparison without automatic bypass findings;
-- pre-revocation payload control requirements;
-- conflicting revocation timestamps remaining `UNKNOWN`;
-- timezone-aware observation validation;
-- policy-import and coverage APIs through the final workspace-bound vNext app;
-- complete CLI entrypoint registration for GraphQL/subscription commands;
-- recursive help-path coverage and controlled CLI validation errors;
-- `authtwin web` serving the same vNext API used by integration tests;
-- Web root/CSP smoke and public Python exports for surface analysis.
+**THE COMPLETE v0.5.0 RELEASE GATE HAS NOT BEEN EXECUTED SUCCESSFULLY FOR THIS BRANCH.**
 
-## Current release-gate status
+The private repository cannot be materialized as a complete local checkout through this runtime. GitHub Actions currently terminates with `startup_failure` before any test job or check-run starts; this is recorded as an infrastructure blocker and not as a test PASS/FAIL.
 
-**FULL CURRENT REPOSITORY GATE NOT EXECUTABLE IN THIS RUNTIME.**
+## Required release evidence
 
-The private repository cannot be materialized as a complete local checkout from the connector, and Ruff, mypy, `build` and `pip-audit` are unavailable from the runtime/index. No GitHub Actions, Codespaces or paid/hosted GitHub execution was used.
-
-Before treating v0.3.1 as a fully validated release, run the exact commit from a local sibling checkout:
+Run from sibling 0.5 checkouts:
 
 ```bash
-python -m pip install -e ../sric-core
-python -m pip install -e '.[dev]'
-python scripts/release-gate.py
+python sric-core/scripts/release-ecosystem.py --root .
 ```
 
-## Previous validated baseline
+The release train builds exact local SRIC/ReproSec candidate wheels before AuthTwin's isolated install smoke, runs the repository gate and then verifies the cross-product contract.
 
-The previous v0.3.0 state was recorded on 2026-07-22 with **21 pytest tests passed**, compileall/security scan/CLI help/synthetic smoke/build/isolated wheel smoke PASS. Those results are a historical baseline only.
+Do not merge/tag AuthTwin 0.5 until its exact-commit `release-gate.json` and the ecosystem `ecosystem-release-gate.json` both report `PASS`.
+
+Previous 0.3.x evidence remains a historical regression baseline only.
