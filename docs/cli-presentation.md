@@ -2,7 +2,7 @@
 
 AuthTwin 0.5.2 uses the shared Sentinel Forge CLI presentation contract from SRIC Core.
 
-Interactive console sessions show a subdued green ASCII banner with the product name, a one-line purpose statement, and `IsdarlinM :: v0.5.2`. The banner is written to interactive stderr, keeping stdout suitable for JSON, reports, redirection, and automation.
+Interactive console sessions show a subdued green ASCII banner ordered as `AuthTwin :: v0.5.2`, `Developer: IsdarlinM`, then the concise purpose statement. The banner is written to interactive stderr, keeping stdout suitable for JSON, reports, redirection, and automation.
 
 Use `authtwin --no-color COMMAND` to disable ANSI/Rich colors. The installed console entrypoint also normalizes `authtwin COMMAND --no-color`. The standard `NO_COLOR` environment variable is honored.
 
