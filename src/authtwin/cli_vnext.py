@@ -44,7 +44,7 @@ def doctor_vnext(
             "version": sys.version.split()[0],
         },
         "sric": {
-            "ok": sric.__version__.startswith("0.4."),
+            "ok": sric.__version__.startswith("0.5."),
             "version": sric.__version__,
         },
         "ai": {"ok": True, "mode": "disabled", "cloud_uploads": False},

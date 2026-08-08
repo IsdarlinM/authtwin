@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.5.0 - 2026-08-08
+- Added coverage-guided validation planning that compresses equivalent `UNKNOWN` authorization cells into representative experiments.
+- Added deterministic cross-tool claim fingerprints for planned authorization coverage gaps.
+- Added safe-only planning by default; destructive and other non-safe validation costs are excluded from automatic experiment selection.
+- Preserved strict semantics: research priority is not exploitability, plans remain `UNKNOWN`, and no finding is created by the planner.
+- Updated SRIC/ReproSec compatibility to the Sentinel Forge 0.5 release train.
+- Made ReproSec an explicitly optional `rcap` integration rather than a standalone runtime requirement.
+- Added capability discovery plus standalone CLI/API/Web contracts that operate with only AuthTwin and SRIC installed.
+- Reworked Linux/Windows installation to resolve SRIC 0.5 automatically and removed silent sibling-checkout discovery.
+- Added clean-install CI, optional-RCAP CI separation and data-preserving Linux uninstall behavior.
+- Added regression tests for equivalence compression, safe validation selection and truth-state preservation.
+
 ## 0.3.1 - 2026-08-06
 - Added explicit `INTENDED`, `CONFIGURED` and `OBSERVED` authorization evidence layers.
 - Added conservative comparison of policy intent, deployed configuration and runtime enforcement.

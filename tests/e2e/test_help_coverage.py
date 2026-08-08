@@ -1,6 +1,6 @@
 from typer.main import get_command
 from typer.testing import CliRunner
-from authtwin.cli import app
+from authtwin.cli_all import app
 
 
 def test_all_registered_commands_have_help() -> None:

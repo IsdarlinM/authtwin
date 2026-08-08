@@ -41,6 +41,7 @@ class UnknownAuthorizationCell(BaseModel):
     adjacent_observed_denies: int = Field(default=0, ge=0)
     adjacent_observed_allows: int = Field(default=0, ge=0)
     validation_cost: ValidationCost = ValidationCost.READ_ONLY_SENSITIVE
+    equivalence_class: str | None = None
     evidence_ids: list[str] = Field(default_factory=list)
     status: ClaimStatus = ClaimStatus.UNKNOWN
 
