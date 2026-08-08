@@ -21,6 +21,7 @@ from .policy_adapters import (
     PolicyProvider,
     normalize_policy_export,
 )
+from .research import AuthorizationValidationPlan, build_validation_plan
 from .surfaces import (
     AccessDecision,
     GraphQLFieldComparison,
@@ -36,6 +37,7 @@ __all__ = [
     "AuthorizationLayer",
     "AuthorizationLayerComparison",
     "AuthorizationMismatch",
+    "AuthorizationValidationPlan",
     "CoveragePriority",
     "GraphQLFieldComparison",
     "GraphQLFieldObservation",
@@ -50,9 +52,10 @@ __all__ = [
     "UnknownAuthorizationCell",
     "ValidationCost",
     "assess_subscription_revocation",
+    "build_validation_plan",
     "compare_authorization_layers",
     "compare_graphql_fields",
     "normalize_policy_export",
     "prioritize_unknown_cells",
 ]
-__version__ = "0.3.1"
+__version__ = "0.5.0"
