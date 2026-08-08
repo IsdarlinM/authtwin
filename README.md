@@ -2,7 +2,7 @@
 
 ```text
 AuthTwin
-imr :: v0.5.0
+IsdarlinM :: v0.5.2
 ```
 
 Authorization Digital Twin for modeling **who can do what, to which resource, in which state**, while preserving `UNKNOWN` instead of inventing findings.
@@ -34,7 +34,8 @@ authtwin capabilities
 - coverage-guided validation planning with explicit equivalence classes;
 - endpoint/resource-family normalization and conservative actor-resource bindings;
 - SRIC 0.5.x graph, jobs/SSE, lineage, notebook/search and confidence primitives;
-- local FastAPI API, responsive Web UI and offline synthetic demo.
+- local FastAPI API, responsive Web UI and offline synthetic demo;
+- professional Rich/Typer terminal presentation with subdued green banner and `--no-color` support.
 
 ## Authorization evidence layers
 
@@ -65,6 +66,10 @@ For optional RCAP interoperability in a package environment:
 ```bash
 python -m pip install 'authtwin[rcap]'
 ```
+
+## CLI presentation
+
+Interactive terminals display a compact subdued-green banner with a short authorization-modeling description and `IsdarlinM :: v0.5.2`. Use `authtwin --no-color COMMAND`, `authtwin COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON and redirected stdout remain clean. See `docs/cli-presentation.md`.
 
 ## Five-minute start
 
