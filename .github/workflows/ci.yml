@@ -40,11 +40,49 @@ jobs:
       - run: python -m pip install -e ./sric-core
       - run: python -m pip install -e . --no-deps
       - run: python -m pip install pytest ruff mypy build pip-audit hypothesis httpx
-      - run: python -m pytest tests/standalone -q
+      - run: python -m sric.standalone_gate --root .
       - run: python scripts/release-gate.py --quick
-      - run: authtwin version
-      - run: authtwin doctor --json
-      - run: authtwin capabilities
+
+  installer-smoke:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: IsdarlinM/sric-core
+          ref: ${{ env.SENTINEL_REF }}
+          path: sric-core
+          token: ${{ secrets.SENTINEL_FORGE_CI_TOKEN }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Linux install/uninstall preservation smoke
+        if: runner.os == 'Linux'
+        shell: bash
+        env:
+          SRIC_CORE_SOURCE: ${{ github.workspace }}/sric-core
+        run: |
+          TEST_HOME="${RUNNER_TEMP}/authtwin-home"
+          mkdir -p "$TEST_HOME"
+          HOME="$TEST_HOME" sh scripts/install-linux.sh
+          "$TEST_HOME/.authtwin/venv/bin/authtwin" init preserve
+          HOME="$TEST_HOME" sh scripts/uninstall-linux.sh
+          test -f "$TEST_HOME/.authtwin/workspaces/preserve/workspace.json"
+      - name: Windows clean installer smoke
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $env:USERPROFILE = Join-Path $env:RUNNER_TEMP 'authtwin-home'
+          $env:SRIC_CORE_SOURCE = Join-Path $env:GITHUB_WORKSPACE 'sric-core'
+          New-Item -ItemType Directory -Force -Path $env:USERPROFILE | Out-Null
+          cmd /c scripts\install-windows.cmd
+          & "$env:USERPROFILE\.authtwin\venv\Scripts\authtwin.exe" version
+          & "$env:USERPROFILE\.authtwin\venv\Scripts\authtwin.exe" doctor --json
+          & "$env:USERPROFILE\.authtwin\venv\Scripts\authtwin.exe" capabilities
 
   rcap-integration:
     runs-on: ubuntu-latest
