@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "authtwin"
-version = "0.5.3"
+version = "0.5.4"
 description = "Evidence-native authorization digital twin and invariant analysis."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -15,11 +15,11 @@ dependencies = [
   "pydantic>=2.10,<3",
   "typer>=0.15,<1",
   "uvicorn>=0.34,<1",
-  "sric-core>=0.5.3,<0.6",
+  "sric-core>=0.5.4,<0.6",
 ]
 
 [project.optional-dependencies]
-rcap = ["reprosec>=0.5.3,<0.6"]
+rcap = ["reprosec>=0.5.4,<0.6"]
 dev = [
   "pytest>=8,<10",
   "httpx>=0.27,<1",
