@@ -1,12 +1,13 @@
 from typer.main import get_command
 
+from authtwin import __version__
 from authtwin.cli_all import BRAND, app
 from sric.cli_style import build_banner
 
 
 def test_authtwin_brand_identity() -> None:
     banner = build_banner(BRAND)
-    product = banner.index("AuthTwin :: v0.5.3")
+    product = banner.index(f"AuthTwin :: v{__version__}")
     developer = banner.index("Developer: IsdarlinM")
     description = banner.index("Model authorization behavior")
     assert product < developer < description
