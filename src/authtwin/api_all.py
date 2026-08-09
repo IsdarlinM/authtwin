@@ -5,6 +5,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from sric.capabilities import discover_capabilities
 from sric.web_console import WebConsoleConfig, mount_web_console
+from sric.web_workbench import mount_feature_workbench
 
 from . import __version__
 from .api_vnext import create_app as create_base_app
@@ -17,13 +18,12 @@ def create_app(workspace: Path) -> FastAPI:
     async def capabilities() -> dict[str, object]:
         return discover_capabilities(current_product="authtwin").model_dump(mode="json")
 
-    mount_web_console(
-        app,
-        WebConsoleConfig(
-            product="authtwin",
-            display_name="AuthTwin",
-            cli_module="authtwin.cli_all",
-            version=__version__,
-        ),
+    config = WebConsoleConfig(
+        product="authtwin",
+        display_name="AuthTwin",
+        cli_module="authtwin.cli_all",
+        version=__version__,
     )
+    manager = mount_web_console(app, config)
+    mount_feature_workbench(app, config, manager)
     return app

@@ -1,7 +1,7 @@
 # AuthTwin
 
 ```text
-AuthTwin :: v0.5.5
+AuthTwin :: v0.5.6
 Developer: IsdarlinM
 
 Model authorization behavior, invariants, and differential evidence.
@@ -38,7 +38,8 @@ authtwin capabilities
 - SRIC 0.5.x graph, jobs/SSE, lineage, notebook/search and confidence primitives;
 - local FastAPI API, responsive Web UI and offline synthetic demo;
 - zero-config official update flow with safe same-version `update --force` reinstall support;
-- Web Command Console with exact public CLI command-tree parity and real-time jobs;
+- full Web Feature Workbench with every public AuthTwin CLI command and argument represented as structured responsive controls;
+- advanced Web Command Console with exact public CLI command-tree parity and real-time jobs;
 - professional Rich/Typer terminal presentation with subdued green banner and `--no-color` support.
 
 ## Authorization evidence layers
@@ -73,7 +74,7 @@ python -m pip install 'authtwin[rcap]'
 
 ## CLI presentation
 
-Interactive terminals display a compact subdued-green banner ordered as `AuthTwin :: v0.5.5`, `Developer: IsdarlinM`, then the authorization-modeling purpose statement. Use `authtwin --no-color COMMAND`, `authtwin COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON and redirected stdout remain clean. See `docs/cli-presentation.md`.
+Interactive terminals display a compact subdued-green banner ordered as `AuthTwin :: v0.5.6`, `Developer: IsdarlinM`, then the authorization-modeling purpose statement. Use `authtwin --no-color COMMAND`, `authtwin COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON and redirected stdout remain clean. See `docs/cli-presentation.md`.
 
 ## Five-minute start
 
@@ -88,9 +89,9 @@ authtwin web demo
 
 ## Web and API
 
-AuthTwin's local Web UI exposes the authorization matrix, coverage, counterfactual plans, evidence detail, search and real-time job state. `/console` adds the Web Command Console, whose catalog is generated from `authtwin.cli_all`; a standalone test requires the Web and CLI command-path sets to be exactly equal.
+AuthTwin's native dashboard remains the authorization-focused quick view for the matrix, coverage, counterfactual plans, evidence detail, search and jobs. `/workbench` provides **All Features**: every public `authtwin.cli_all` command and every CLI parameter as a structured responsive Web form. `/console` remains the advanced argv-oriented console.
 
-The console is **not an operating-system web shell**. It invokes only the fixed SRIC runner with `shell=False`, disabled stdin and a structured argv array. Mutating commands require explicit approval, while AuthTwin's evidence and validation semantics remain authoritative. See `docs/web/cli-parity.md`.
+The Workbench is generated from the installed CLI tree and the release gate fails if a command or parameter disappears from Web representation. It is not an operating-system shell: execution uses the fixed SRIC runner with `shell=False`, disabled stdin, CSRF protection, secret redaction, bounded/cancellable jobs and SSE output. AuthTwin evidence semantics and human-controlled validation remain authoritative; a Web invocation cannot convert missing evidence or an authorization gap into `VALIDATED`.
 
 ## Updates
 
@@ -114,6 +115,8 @@ Normal users do **not** provide a manifest or public key. SRIC resolves only the
 python -m sric.standalone_gate --root .
 python scripts/release-gate.py
 ```
+
+The 0.5.6 interface regression suite walks every public AuthTwin command, checks command help, verifies each option/required argument and compares the complete ordered CLI parameter tree with the Workbench catalog. Core native Web/API feature routes are also smoke-tested. Destructive operations are gate-tested rather than executed solely for coverage.
 
 Standalone and full release evidence are written below `build/release-evidence/`. A release is complete only when evidence for the exact commit is PASS.
 

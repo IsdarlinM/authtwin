@@ -58,4 +58,4 @@ __all__ = [
     "normalize_policy_export",
     "prioritize_unknown_cells",
 ]
-__version__ = "0.5.5"
+__version__ = "0.5.6"
