@@ -1,11 +1,11 @@
-# Web/CLI capability parity
+# Web/CLI feature parity
 
-AuthTwin 0.5.4 mounts the shared SRIC 0.5.4 Web Command Console at `/console`.
+AuthTwin 0.5.6 mounts the shared SRIC Web Feature Workbench at `/workbench` and retains `/console` as an advanced argv-oriented surface.
 
-The console discovers `authtwin.cli_all` at runtime and exposes the same public command tree, including nested commands, through a responsive same-origin UI and `/api/v1/console/*` API. A standalone regression test requires the Web catalog and CLI catalog to be exactly equal.
+The Workbench derives its catalog from `authtwin.cli_all`. Every public command and every ordered CLI parameter is represented as a structured responsive Web control. `/api/v1/workbench/coverage` fails the contract when a command or parameter is missing.
 
-This is not an operating-system shell. Execution uses the fixed `sric.web_console_runner`, `shell=False`, disabled stdin and an argv array. The browser cannot choose an executable. Mutating commands require explicit approval; destructive command names require an approval phrase. AuthTwin authorization-model, evidence and validation safety gates remain authoritative, and missing evidence remains `UNKNOWN`.
+Execution remains outside an operating-system shell: structured fields become argv for the fixed `sric.web_console_runner` with `shell=False`, disabled stdin, CSRF protection, redaction, bounded/cancellable jobs and SSE output. Mutating/destructive approval is preserved.
 
-Arguments and retained output are redacted, output is rendered as untrusted text, console jobs are cancellable and output/status is streamed with SSE. Commands requiring interactive stdin must use their explicit CLI flags in the Web argument field.
+AuthTwin evidence semantics remain authoritative. Missing authorization evidence stays `UNKNOWN`, and Web execution cannot manufacture `VALIDATED` findings.
 
-See the shared SRIC document `docs/web/cli-parity.md` for the complete execution and security contract.
+The release tests invoke help for every public command, verify all options/required arguments, compare the complete ordered CLI parameter tree against the Workbench schema and smoke-test native authorization Web/API routes. Destructive actions are gate-tested instead of being executed merely for coverage.
