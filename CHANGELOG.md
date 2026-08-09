@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.4 - 2026-08-08
+- Added the SRIC Web Command Console at `/console`, exposing the complete installed `authtwin.cli_all` command tree without an operating-system shell.
+- Added exact Web-catalog-to-CLI-tree regression coverage so future public CLI commands cannot silently disappear from the Web console.
+- Preserved AuthTwin evidence semantics, authorization safety controls and human-controlled validation; missing evidence remains `UNKNOWN`.
+- Added fixed-runner `shell=False` execution, explicit mutation approval, secret redaction, cancellable jobs and real-time SSE output through SRIC Core 0.5.4.
+- Updated SRIC to 0.5.4 and the optional ReproSec `rcap` compatibility range to 0.5.4.
+
 ## 0.5.3 - 2026-08-08
 - Added `authtwin update --force` for explicit same-version reinstall of a trusted signed release using pip `--force-reinstall`.
 - Preserved Ed25519 manifest verification, SHA-256 wheel verification, state backup and rollback behavior.
