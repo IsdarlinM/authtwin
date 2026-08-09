@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.3 - 2026-08-08
+- Added `authtwin update --force` for explicit same-version reinstall of a trusted signed release using pip `--force-reinstall`.
+- Preserved Ed25519 manifest verification, SHA-256 wheel verification, state backup and rollback behavior.
+- `--force` may install the same or a newer signed release, never an older release; SemVer prerelease precedence is enforced by SRIC Core.
+- `--check` and `--force` are mutually exclusive.
+- Updated the SRIC Core runtime floor, lock and exact first-party source pin to 0.5.3 while keeping ReproSec optional through the `rcap` extra.
+- Added standalone regression coverage for the public `--force` CLI contract.
+
 ## 0.5.2 - 2026-08-08
 - Added a subdued green interactive CLI banner ordered as `AuthTwin :: v0.5.2`, `Developer: IsdarlinM`, then the product description.
 - Added colorized Typer/Rich command help plus global `--no-color` and `NO_COLOR` support.
