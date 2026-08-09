@@ -10,6 +10,7 @@ from . import cli_surfaces as _cli_surfaces  # noqa: F401
 from .api_all import create_app as create_complete_app
 from .cli_vnext import app
 from . import cli_capabilities as _cli_capabilities  # noqa: F401
+from . import cli_update as _cli_update  # noqa: F401,E402
 
 _base_cli.create_app = create_complete_app
 
