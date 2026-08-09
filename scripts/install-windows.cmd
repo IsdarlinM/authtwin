@@ -12,17 +12,37 @@ set "BIN_DIR=%USERPROFILE%\.local\bin"
 set "PY_CMD="
 
 where py >nul 2>&1
-if not errorlevel 1 (py -3 -c "import sys; raise SystemExit(0 if sys.version_info >= (3,11) else 1)" >nul 2>&1 & if not errorlevel 1 set "PY_CMD=py -3")
-if not defined PY_CMD (where python >nul 2>&1 & if not errorlevel 1 (python -c "import sys; raise SystemExit(0 if sys.version_info >= (3,11) else 1)" >nul 2>&1 & if not errorlevel 1 set "PY_CMD=python"))
-if not defined PY_CMD (echo Python 3.11+ is required.& exit /b 2)
+if not errorlevel 1 (
+  py -3 -c "import sys; raise SystemExit(0 if sys.version_info >= (3,11) else 1)" >nul 2>&1
+  if not errorlevel 1 set "PY_CMD=py -3"
+)
+if not defined PY_CMD (
+  where python >nul 2>&1
+  if not errorlevel 1 (
+    python -c "import sys; raise SystemExit(0 if sys.version_info >= (3,11) else 1)" >nul 2>&1
+    if not errorlevel 1 set "PY_CMD=python"
+  )
+)
+if not defined PY_CMD (
+  echo Python 3.11+ is required.
+  exit /b 2
+)
+
 if not exist "%INSTALL_ROOT%" mkdir "%INSTALL_ROOT%"
 if not exist "%BIN_DIR%" mkdir "%BIN_DIR%"
 if exist "%VENV%\Scripts\python.exe" (
   "%VENV%\Scripts\python.exe" -c "import sys; raise SystemExit(0 if sys.version_info >= (3,11) else 1)" >nul 2>&1
-  if errorlevel 1 (echo Rebuilding obsolete or broken runtime environment: %VENV%& rmdir /s /q "%VENV%" || exit /b 3)
-) else if exist "%VENV%" (echo Rebuilding incomplete runtime environment: %VENV%& rmdir /s /q "%VENV%" || exit /b 3)
+  if errorlevel 1 (
+    echo Rebuilding obsolete or broken runtime environment: %VENV%
+    rmdir /s /q "%VENV%" || exit /b 3
+  )
+) else if exist "%VENV%" (
+  echo Rebuilding incomplete runtime environment: %VENV%
+  rmdir /s /q "%VENV%" || exit /b 3
+)
 if not exist "%VENV%\Scripts\python.exe" %PY_CMD% -m venv "%VENV%" || (echo Failed to create isolated Python environment.& exit /b 3)
 "%VENV%\Scripts\python.exe" -m pip install --upgrade pip setuptools wheel || (echo Failed to bootstrap pip/setuptools/wheel.& exit /b 3)
+
 if defined SRIC_CORE_SOURCE (
   if not exist "%SRIC_CORE_SOURCE%\pyproject.toml" (echo SRIC_CORE_SOURCE is invalid.& exit /b 3)
   "%VENV%\Scripts\python.exe" -m pip install --upgrade --force-reinstall -c "%CONSTRAINTS%" "%SRIC_CORE_SOURCE%" "%REPO_ROOT%" || (echo Atomic AuthTwin/SRIC installation failed.& exit /b 3)
@@ -32,8 +52,10 @@ if defined SRIC_CORE_SOURCE (
 )
 "%VENV%\Scripts\python.exe" -m pip check || (echo Installed dependency graph is inconsistent.& exit /b 3)
 "%VENV%\Scripts\python.exe" -c "import importlib.metadata as m; import sric.web_console, sric.web_workbench; v=tuple(int(x) for x in m.version('sric-core').split('.')[:3]); raise SystemExit(0 if (0,5,7)<=v<(0,6,0) else 1)" || (echo SRIC Core runtime integrity check failed. Required ^>=0.5.7,^<0.6.& exit /b 3)
+
 >"%BIN_DIR%\%CMD%.cmd" echo @"%VENV%\Scripts\%CMD%.exe" %%*
 "%VENV%\Scripts\python.exe" -m sric.install_path "%BIN_DIR%" || exit /b 3
+
 "%VENV%\Scripts\%CMD%.exe" doctor --json || exit /b 1
 "%VENV%\Scripts\%CMD%.exe" capabilities || exit /b 1
 "%VENV%\Scripts\%CMD%.exe" --help >nul || exit /b 1
