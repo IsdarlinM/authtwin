@@ -56,10 +56,13 @@ if defined SRIC_CORE_SOURCE (
 >"%BIN_DIR%\%CMD%.cmd" echo @"%VENV%\Scripts\%CMD%.exe" %%*
 "%VENV%\Scripts\python.exe" -m sric.install_path "%BIN_DIR%" || exit /b 3
 
+rem Render the product banner once with doctor; suppress internal smoke tests.
 "%VENV%\Scripts\%CMD%.exe" doctor --json || exit /b 1
+set "SENTINEL_BANNER=off"
 "%VENV%\Scripts\%CMD%.exe" capabilities || exit /b 1
 "%VENV%\Scripts\%CMD%.exe" --help >nul || exit /b 1
 "%VENV%\Scripts\%CMD%.exe" -h >nul || exit /b 1
 "%VENV%\Scripts\%CMD%.exe" help >nul || exit /b 1
+set "SENTINEL_BANNER="
 echo %PROJECT% installed/repaired successfully in standalone mode.
 exit /b 0
