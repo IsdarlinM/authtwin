@@ -24,9 +24,11 @@ if [ -n "${SRIC_CORE_SOURCE:-}" ]; then [ -f "$SRIC_CORE_SOURCE/pyproject.toml" 
 "$VENV/bin/python" -c 'import importlib.metadata as m; import sric.web_console, sric.web_workbench; v=tuple(int(x) for x in m.version("sric-core").split(".")[:3]); raise SystemExit(0 if (0,5,7)<=v<(0,6,0) else 1)' || { echo "SRIC Core runtime integrity check failed; required >=0.5.7,<0.6." >&2; exit 3; }
 ln -sfn "$VENV/bin/$CMD" "$BIN_DIR/$CMD"
 case ":${PATH:-}:" in *":$BIN_DIR:"*) ;; *) PROFILE="${HOME}/.profile"; PATH_LINE='export PATH="$HOME/.local/bin:$PATH"'; touch "$PROFILE"; grep -F "$PATH_LINE" "$PROFILE" >/dev/null 2>&1 || printf '\n# Sentinel Forge tools\n%s\n' "$PATH_LINE" >> "$PROFILE" ;; esac
+
+# Render the product banner once with doctor; internal smoke tests suppress it.
 "$VENV/bin/$CMD" doctor --json
-"$VENV/bin/$CMD" capabilities
-"$VENV/bin/$CMD" --help >/dev/null
-"$VENV/bin/$CMD" -h >/dev/null
-"$VENV/bin/$CMD" help >/dev/null
+SENTINEL_BANNER=off "$VENV/bin/$CMD" capabilities
+SENTINEL_BANNER=off "$VENV/bin/$CMD" --help >/dev/null
+SENTINEL_BANNER=off "$VENV/bin/$CMD" -h >/dev/null
+SENTINEL_BANNER=off "$VENV/bin/$CMD" help >/dev/null
 printf '%s installed/repaired successfully in standalone mode.\n' "$PROJECT"
