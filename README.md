@@ -1,7 +1,7 @@
 # AuthTwin
 
 ```text
-AuthTwin :: v0.5.2
+AuthTwin :: v0.5.3
 Developer: IsdarlinM
 
 Model authorization behavior, invariants, and differential evidence.
@@ -37,6 +37,7 @@ authtwin capabilities
 - endpoint/resource-family normalization and conservative actor-resource bindings;
 - SRIC 0.5.x graph, jobs/SSE, lineage, notebook/search and confidence primitives;
 - local FastAPI API, responsive Web UI and offline synthetic demo;
+- signed update flow with safe same-version `update --force` reinstall support;
 - professional Rich/Typer terminal presentation with subdued green banner and `--no-color` support.
 
 ## Authorization evidence layers
@@ -71,7 +72,7 @@ python -m pip install 'authtwin[rcap]'
 
 ## CLI presentation
 
-Interactive terminals display a compact subdued-green banner ordered as `AuthTwin :: v0.5.2`, `Developer: IsdarlinM`, then the authorization-modeling purpose statement. Use `authtwin --no-color COMMAND`, `authtwin COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON and redirected stdout remain clean. See `docs/cli-presentation.md`.
+Interactive terminals display a compact subdued-green banner ordered as `AuthTwin :: v0.5.3`, `Developer: IsdarlinM`, then the authorization-modeling purpose statement. Use `authtwin --no-color COMMAND`, `authtwin COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON and redirected stdout remain clean. See `docs/cli-presentation.md`.
 
 ## Five-minute start
 
@@ -87,6 +88,18 @@ authtwin web demo
 ## Web and API
 
 AuthTwin's local Web UI exposes the authorization matrix, coverage, counterfactual plans, evidence detail, search and real-time job state. It is a structured application UI, **not an operating-system web shell**.
+
+## Signed updates
+
+The updater accepts only an Ed25519-signed manifest and a SHA-256 verified wheel. Configure `AUTHTWIN_RELEASE_MANIFEST_URL` plus `AUTHTWIN_RELEASE_PUBLIC_KEY`, or pass `--manifest` and `--public-key`.
+
+```bash
+authtwin update --check
+authtwin update
+authtwin update --force
+```
+
+`--force` reinstalls the selected signed release even when that exact version is already installed. It may install a newer signed version but never downgrades; `--check` and `--force` cannot be combined. No unsigned or blind `git pull` fallback is used. Until the official signed release channel is published, release-channel configuration remains explicit.
 
 ## Validation gates
 
