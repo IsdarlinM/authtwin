@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "product": "authtwin",
+  "repository": "IsdarlinM/authtwin",
+  "version": "0.5.5",
+  "commit": "b1dc5aa41b6785d2d52eed85b39460037dc095b2",
+  "rollback_version": "0.5.4",
+  "rollback_commit": "e7183d82b6c827d19a263835ee27fd5d3976ab5a"
+}
