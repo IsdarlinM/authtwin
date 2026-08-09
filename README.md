@@ -1,7 +1,7 @@
 # AuthTwin
 
 ```text
-AuthTwin :: v0.5.3
+AuthTwin :: v0.5.4
 Developer: IsdarlinM
 
 Model authorization behavior, invariants, and differential evidence.
@@ -38,6 +38,7 @@ authtwin capabilities
 - SRIC 0.5.x graph, jobs/SSE, lineage, notebook/search and confidence primitives;
 - local FastAPI API, responsive Web UI and offline synthetic demo;
 - signed update flow with safe same-version `update --force` reinstall support;
+- Web Command Console with exact public CLI command-tree parity and real-time jobs;
 - professional Rich/Typer terminal presentation with subdued green banner and `--no-color` support.
 
 ## Authorization evidence layers
@@ -72,7 +73,7 @@ python -m pip install 'authtwin[rcap]'
 
 ## CLI presentation
 
-Interactive terminals display a compact subdued-green banner ordered as `AuthTwin :: v0.5.3`, `Developer: IsdarlinM`, then the authorization-modeling purpose statement. Use `authtwin --no-color COMMAND`, `authtwin COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON and redirected stdout remain clean. See `docs/cli-presentation.md`.
+Interactive terminals display a compact subdued-green banner ordered as `AuthTwin :: v0.5.4`, `Developer: IsdarlinM`, then the authorization-modeling purpose statement. Use `authtwin --no-color COMMAND`, `authtwin COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON and redirected stdout remain clean. See `docs/cli-presentation.md`.
 
 ## Five-minute start
 
@@ -87,7 +88,9 @@ authtwin web demo
 
 ## Web and API
 
-AuthTwin's local Web UI exposes the authorization matrix, coverage, counterfactual plans, evidence detail, search and real-time job state. It is a structured application UI, **not an operating-system web shell**.
+AuthTwin's local Web UI exposes the authorization matrix, coverage, counterfactual plans, evidence detail, search and real-time job state. `/console` adds the Web Command Console, whose catalog is generated from `authtwin.cli_all`; a standalone test requires the Web and CLI command-path sets to be exactly equal.
+
+The console is **not an operating-system web shell**. It invokes only the fixed SRIC runner with `shell=False`, disabled stdin and a structured argv array. Mutating commands require explicit approval, while AuthTwin's evidence and validation semantics remain authoritative. See `docs/web/cli-parity.md`.
 
 ## Signed updates
 
