@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.7 - 2026-08-09
+- Fixed first-party runtime drift that could leave a new AuthTwin installed beside an older SRIC and make shared Web imports fail before the CLI could reach `doctor` or `update`.
+- Added exact SRIC version/module diagnostics, lazy shared-Web imports, `/api/v1/runtime-compatibility`, and actionable degraded Workbench 503 responses.
+- Official updates now repair supported stale/corrupt SRIC 0.5.x runtimes through immutable GitHub-signature-verified transition snapshots before updating AuthTwin.
+- Linux/Windows installers force-reinstall pinned first-party dependencies and AuthTwin, run `pip check`, import-probe Web Console/Workbench and execute doctor/capability/help smokes.
+- Added regressions for stale/missing Workbench runtimes, signed transition chain, same-version repair, every public CLI help form and exact ordered CLI/Web parameter parity.
+- New installs pin signed SRIC 0.5.8; optional RCAP compatibility is aligned to ReproSec 0.5.7.
+
 ## 0.5.6 - 2026-08-09
 - Added the full Web Feature Workbench at `/workbench`, generated from `authtwin.cli_all`, so every public CLI command and argument has a structured responsive Web representation.
 - Preserved the native authorization matrix/coverage/counterfactual Web/API features and AuthTwin `UNKNOWN`/evidence semantics while adding the shared Workbench.
