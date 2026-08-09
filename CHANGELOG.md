@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.6 - 2026-08-09
+- Added the full Web Feature Workbench at `/workbench`, generated from `authtwin.cli_all`, so every public CLI command and argument has a structured responsive Web representation.
+- Preserved the native authorization matrix/coverage/counterfactual Web/API features and AuthTwin `UNKNOWN`/evidence semantics while adding the shared Workbench.
+- Reused SRIC `shell=False`, CSRF, redaction, bounded/cancellable jobs and approval gates; Web execution cannot bypass AuthTwin validation semantics.
+- Updated SRIC Core and optional ReproSec compatibility to 0.5.6 and pinned the exact signed SRIC Workbench release.
+- Added exhaustive CLI help/argument-to-Web parity tests plus native authorization API smoke coverage.
+
 ## 0.5.5 - 2026-08-08
 - Made the official AuthTwin updater zero-config: `authtwin update`, `authtwin update --check`, and `authtwin update --force` no longer require user-supplied manifest/key configuration.
 - Delegated official update trust and immutable GitHub signed-commit validation to SRIC Core 0.5.5 while preserving same-version force reinstall and downgrade rejection.
