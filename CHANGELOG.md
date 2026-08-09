@@ -5,7 +5,8 @@
 - Termux now prefers a writable `$PREFIX/bin` already present in `PATH`, making `authtwin` immediately reachable after installation.
 - Windows PATH updates now use SRIC Core's registry-backed `sric.install_path` helper instead of `setx`, avoiding user-PATH truncation/rewrite hazards.
 - Preserved the atomic AuthTwin + explicit first-party SRIC resolver fix and updated the immutable SRIC pin/runtime lock to SRIC Core 0.5.10 while keeping ReproSec optional.
-- Expanded installer regressions for venv-only repair, Termux path selection, safe Windows PATH handling, Python discovery, dependency integrity and help smokes.
+- Installer validation now renders the AuthTwin banner at most once: `doctor` remains user-visible while internal capability/help smokes run with `SENTINEL_BANNER=off`.
+- Expanded installer regressions for venv-only repair, Termux path selection, safe Windows PATH handling, Python discovery, dependency integrity, help smokes and single-banner output.
 
 ## 0.5.8 - 2026-08-09
 - Fixed clean/repair installation `ResolutionImpossible` when AuthTwin depends on the first-party `sric-core` package distributed from an immutable GitHub snapshot rather than PyPI.
