@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.8 - 2026-08-09
+- Fixed clean/repair installation `ResolutionImpossible` when AuthTwin depends on the first-party `sric-core` package distributed from an immutable GitHub snapshot rather than PyPI.
+- Linux/Termux and Windows now resolve AuthTwin plus the explicit SRIC source in one pip transaction; the installer no longer performs a product-only `--force-reinstall` that can make pip search the public index for `sric-core`.
+- Updated the immutable first-party SRIC pin and runtime lock to SRIC Core 0.5.9 while keeping ReproSec an optional `rcap` integration.
+- Fixed Linux PATH persistence so `.profile` does not inject literal quote characters into PATH.
+- Fixed Windows Python discovery to accept any installed Python 3 runtime that satisfies `>=3.11` instead of requiring `py -3.11` specifically.
+- Installers now bootstrap pip/setuptools/wheel, run `pip check`, import-probe shared Web modules, and smoke-test `--help`, `-h`, and `help` before reporting success.
+- Added standalone regression coverage for the exact resolver topology, immutable SRIC pin, PATH quoting and Windows Python selection.
+
 ## 0.5.7 - 2026-08-09
 - Fixed first-party runtime drift that could leave a new AuthTwin installed beside an older SRIC and make shared Web imports fail before the CLI could reach `doctor` or `update`.
 - Added exact SRIC version/module diagnostics, lazy shared-Web imports, `/api/v1/runtime-compatibility`, and actionable degraded Workbench 503 responses.
