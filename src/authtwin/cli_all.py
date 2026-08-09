@@ -7,12 +7,18 @@ from . import __version__
 from . import cli as _base_cli
 from . import cli_research as _cli_research  # noqa: F401
 from . import cli_surfaces as _cli_surfaces  # noqa: F401
-from .api_all import create_app as create_complete_app
 from .cli_vnext import app
 from . import cli_capabilities as _cli_capabilities  # noqa: F401
 from . import cli_update as _cli_update  # noqa: F401,E402
 
-_base_cli.create_app = create_complete_app
+
+def _create_complete_app(*args: object, **kwargs: object) -> object:
+    from .api_all import create_app
+
+    return create_app(*args, **kwargs)
+
+
+_base_cli.create_app = _create_complete_app
 
 __all__ = ["BRAND", "app", "normalize_help_argv", "run"]
 
@@ -25,12 +31,8 @@ app.rich_markup_mode = "rich"
 
 
 @app.callback()
-def branded_main(
-    ctx: typer.Context,
-    no_color: bool = no_color_option(),
-) -> None:
+def branded_main(ctx: typer.Context, no_color: bool = no_color_option()) -> None:
     """AuthTwin CLI presentation controls."""
-
     configure_cli_context(ctx, no_color=no_color)
 
 
@@ -44,5 +46,4 @@ def normalize_help_argv(argv: list[str]) -> list[str]:
 
 def run() -> None:
     """Console entrypoint including the branded CLI and local Web/API."""
-
     run_branded_cli(app, BRAND, argv_normalizer=normalize_help_argv)
