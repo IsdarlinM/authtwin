@@ -6,7 +6,7 @@ from sric.cli_style import build_banner
 
 def test_authtwin_brand_identity() -> None:
     banner = build_banner(BRAND)
-    product = banner.index("AuthTwin :: v0.5.2")
+    product = banner.index("AuthTwin :: v0.5.3")
     developer = banner.index("Developer: IsdarlinM")
     description = banner.index("Model authorization behavior")
     assert product < developer < description
