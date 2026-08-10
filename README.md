@@ -1,7 +1,7 @@
 # AuthTwin
 
 ```text
-AuthTwin :: v0.5.9
+AuthTwin :: v0.5.10
 Developer: IsdarlinM
 
 Model authorization behavior, invariants, and differential evidence.
@@ -38,6 +38,7 @@ authtwin capabilities
 - zero-config official update flow with same-version `update --force`, rollback and first-party runtime repair;
 - exact SRIC version/module compatibility checks in `doctor` and `/api/v1/runtime-compatibility`;
 - full Web Feature Workbench with every public AuthTwin CLI command and argument represented as structured responsive controls;
+- JSON-safe shared Web command catalog generation from SRIC 0.5.11;
 - degraded Web mode that preserves the authorization dashboard and reports an actionable 503 if a shared Workbench module is unavailable;
 - advanced Web Command Console with exact public CLI command-tree parity and real-time jobs;
 - professional Rich/Typer terminal presentation with subdued green banner and `--no-color` support.
@@ -64,9 +65,11 @@ authtwin doctor --json
 authtwin capabilities
 ```
 
-The normal installer pins SRIC Core to an immutable GitHub commit and resolves that explicit first-party source **in the same pip transaction as AuthTwin**. Because `sric-core` is intentionally not discovered from PyPI, the installer does not perform a later product-only `--force-reinstall` that could trigger `ResolutionImpossible`. `SRIC_CORE_SOURCE=/path/to/sric-core` remains an explicit development/release-validation override.
+The normal installer pins SRIC Core to an immutable GitHub commit and resolves that explicit first-party source **in the same pip transaction as AuthTwin**. Because `sric-core` is intentionally not discovered from PyPI, the installer does not perform a later product-only reinstall that could trigger `ResolutionImpossible`. `SRIC_CORE_SOURCE=/path/to/sric-core` remains an explicit development/release-validation override.
 
-The repair path preserves workspaces and evidence. It validates both host Python and the existing runtime interpreter; a stale, incomplete or broken environment rebuilds only `~/.authtwin/venv`. It bootstraps `pip`, `setuptools` and `wheel`, force-reinstalls constrained AuthTwin plus the explicit SRIC source, runs `pip check`, imports `sric.web_console` and `sric.web_workbench`, checks the supported SRIC version range, and runs doctor/capability plus `--help`, `-h` and `help` smokes.
+The repair path preserves workspaces and evidence. It validates both host Python and the existing runtime interpreter; a stale, incomplete or broken environment rebuilds only `~/.authtwin/venv`. It bootstraps `pip`, `setuptools` and `wheel`, resolves constrained AuthTwin plus the explicit SRIC source, runs `pip check`, imports `sric.web_console`, `sric.web_workbench` and `sric.web_catalog`, requires SRIC `>=0.5.11,<0.6`, and runs doctor/capability plus `--help`, `-h` and `help` smokes.
+
+Installer-internal smokes use `SENTINEL_BANNER=never` and a temporary validation log. Successful installation no longer repeats the AuthTwin banner; failure output is retained and emitted when a check fails. Normal installation does not use `--force-reinstall`.
 
 On Termux, a writable `$PREFIX/bin` already present in `PATH` is preferred so `authtwin` becomes immediately reachable. Standard Linux falls back to `~/.local/bin` and persists the canonical profile entry only when necessary. Windows uses SRIC's registry-backed `sric.install_path` helper instead of `setx`; any Python 3 interpreter satisfying `>=3.11` is accepted.
 
@@ -78,7 +81,7 @@ python -m pip install 'authtwin[rcap]'
 
 ## CLI presentation
 
-Interactive terminals display a compact subdued-green banner ordered as `AuthTwin :: v0.5.9`, `Developer: IsdarlinM`, then the authorization-modeling purpose statement. Use `authtwin --no-color COMMAND`, `authtwin COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON and redirected stdout remain clean.
+Interactive terminals display a compact subdued-green banner ordered as `AuthTwin :: v0.5.10`, `Developer: IsdarlinM`, then the authorization-modeling purpose statement. Use `authtwin --no-color COMMAND`, `authtwin COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON and redirected stdout remain clean.
 
 The help contract covers `authtwin --help`, `authtwin -h`, `authtwin help`, `authtwin COMMAND --help`, `authtwin COMMAND -h` and `authtwin COMMAND help`.
 
@@ -97,7 +100,7 @@ authtwin web demo
 
 AuthTwin's native dashboard remains the authorization-focused quick view for matrix, coverage, counterfactual plans, evidence detail, search and jobs. `/workbench` provides **All Features**: every public `authtwin.cli_all` command and every CLI parameter as a structured responsive Web form. `/console` remains the advanced argv-oriented console, and `/api/v1/runtime-compatibility` exposes the shared-runtime diagnostic.
 
-Shared Web modules are loaded lazily. A stale/corrupt SRIC therefore no longer turns an optional UI import into a global CLI failure; the native application remains reachable and the missing Workbench reports `RUNTIME_INCOMPATIBLE` with repair instructions. The Workbench remains generated from the installed CLI tree and the release gate fails if a command or parameter disappears from Web representation.
+SRIC 0.5.11 normalizes command metadata to deterministic JSON-safe primitives before FastAPI serialization, preventing unusual CLI defaults or Typer metadata from surfacing as an opaque catalog HTTP 500. Shared Web modules are loaded lazily; a stale/corrupt SRIC therefore no longer turns an optional UI import into a global CLI failure.
 
 Execution is not an operating-system shell: the fixed SRIC runner uses `shell=False`, disabled stdin, CSRF protection, redaction, bounded/cancellable jobs and SSE output. AuthTwin evidence semantics and human-controlled validation remain authoritative; a Web invocation cannot turn an unobserved gap into `VALIDATED`.
 
@@ -120,7 +123,7 @@ python -m sric.standalone_gate --root .
 python scripts/release-gate.py
 ```
 
-The 0.5.9 installer regression verifies the unpublished-first-party resolver topology, immutable SRIC pin, runtime lock, venv-only repair, Termux `$PREFIX/bin`, safe Windows PATH handling, Python discovery and dependency/import/help smokes. Existing runtime/interface and unit/integration/E2E/security suites continue to cover actors, roles, tenants, authorization matrix, invariants, differential behavior, lifecycle, GraphQL/batch/WebSocket surfaces and `UNKNOWN`/evidence semantics. Destructive operations are gate-tested rather than executed solely for coverage.
+The 0.5.10 installer regression verifies atomic first-party resolution, signed SRIC 0.5.11 pin/lock, venv-only repair, Termux `$PREFIX/bin`, safe Windows PATH handling, quiet installer smokes and dependency/import/help checks. Web regressions require Console/Workbench catalogs to return HTTP 200 with non-empty command/feature sets and complete CLI/Web coverage. Existing runtime/interface and unit/integration/E2E/security suites continue to cover actors, roles, tenants, authorization matrix, invariants, differential behavior, lifecycle, GraphQL/batch/WebSocket surfaces and `UNKNOWN`/evidence semantics. Destructive operations are gate-tested rather than executed solely for coverage.
 
 Standalone and full release evidence are written below `build/release-evidence/`. A release is complete only when evidence for the exact commit is PASS.
 
