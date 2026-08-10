@@ -44,9 +44,12 @@ def create_app(workspace: Path) -> FastAPI:
         return {"compatible": runtime.compatible, "sric_version": runtime.version, "missing_modules": list(runtime.missing_modules), "reasons": list(runtime.reasons)}
 
     try:
+        from sric.web_catalog import install_json_safe_catalog
         from sric.web_console import WebConsoleConfig, mount_web_console
+
+        install_json_safe_catalog()
     except ModuleNotFoundError as exc:
-        _mount_degraded_workbench(app, f"missing shared Web console module: {exc.name or exc}")
+        _mount_degraded_workbench(app, f"missing shared Web console/catalog module: {exc.name or exc}")
         return app
 
     config = WebConsoleConfig(product="authtwin", display_name="AuthTwin", cli_module="authtwin.cli_all", version=__version__)
