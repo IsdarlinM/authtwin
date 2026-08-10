@@ -7,8 +7,14 @@ from . import __version__
 from . import cli as _base_cli
 from . import cli_research as _cli_research  # noqa: F401
 from . import cli_surfaces as _cli_surfaces  # noqa: F401
+
+# cli.py historically referenced the workspace helper as `wp` from the
+# notebook command while defining it as `ws_path`. Keep one canonical
+# implementation and bind the compatibility name before vNext commands load.
+_base_cli.wp = _base_cli.ws_path
+
 from .cli_vnext import app
-from . import cli_capabilities as _cli_capabilities  # noqa: F401
+from . import cli_capabilities as _cli_capabilities  # noqa: F401,E402
 from . import cli_update as _cli_update  # noqa: F401,E402
 
 
