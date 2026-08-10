@@ -9,7 +9,8 @@ permissions:
   contents: read
 
 env:
-  SENTINEL_REF: ${{ github.head_ref || github.ref_name }}
+  SRIC_CORE_CI_REF: ccfef33dc2cb45f9050b17435d65b367eb1daaea
+  REPROSEC_CI_REF: d3af3d00e65c872d988a8e46a522cf503de391f9
 
 jobs:
   standalone:
@@ -21,17 +22,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - name: Require private core read token
-        shell: bash
-        env:
-          TOKEN: ${{ secrets.SENTINEL_FORGE_CI_TOKEN }}
-        run: test -n "$TOKEN" || { echo 'Configure SENTINEL_FORGE_CI_TOKEN with read access to sric-core.'; exit 1; }
       - uses: actions/checkout@v4
         with:
           repository: IsdarlinM/sric-core
-          ref: ${{ env.SENTINEL_REF }}
+          ref: ${{ env.SRIC_CORE_CI_REF }}
           path: sric-core
-          token: ${{ secrets.SENTINEL_FORGE_CI_TOKEN }}
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
@@ -54,9 +49,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: IsdarlinM/sric-core
-          ref: ${{ env.SENTINEL_REF }}
+          ref: ${{ env.SRIC_CORE_CI_REF }}
           path: sric-core
-          token: ${{ secrets.SENTINEL_FORGE_CI_TOKEN }}
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -72,7 +66,7 @@ jobs:
           "$TEST_HOME/.authtwin/venv/bin/authtwin" init preserve
           HOME="$TEST_HOME" sh scripts/uninstall-linux.sh
           test -f "$TEST_HOME/.authtwin/workspaces/preserve/workspace.json"
-      - name: Windows clean installer smoke
+      - name: Windows install/uninstall preservation smoke
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
@@ -80,9 +74,14 @@ jobs:
           $env:SRIC_CORE_SOURCE = Join-Path $env:GITHUB_WORKSPACE 'sric-core'
           New-Item -ItemType Directory -Force -Path $env:USERPROFILE | Out-Null
           cmd /c scripts\install-windows.cmd
-          & "$env:USERPROFILE\.authtwin\venv\Scripts\authtwin.exe" version
-          & "$env:USERPROFILE\.authtwin\venv\Scripts\authtwin.exe" doctor --json
-          & "$env:USERPROFILE\.authtwin\venv\Scripts\authtwin.exe" capabilities
+          $runtime = "$env:USERPROFILE\.authtwin\venv\Scripts\authtwin.exe"
+          & $runtime version
+          & $runtime doctor --json
+          & $runtime capabilities
+          & $runtime init preserve
+          cmd /c scripts\uninstall-windows.cmd
+          if (Test-Path "$env:USERPROFILE\.authtwin\venv") { throw 'runtime venv was not removed' }
+          if (-not (Test-Path "$env:USERPROFILE\.authtwin\workspaces\preserve\workspace.json")) { throw 'workspace data was removed' }
 
   rcap-integration:
     runs-on: ubuntu-latest
@@ -91,15 +90,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: IsdarlinM/sric-core
-          ref: ${{ env.SENTINEL_REF }}
+          ref: ${{ env.SRIC_CORE_CI_REF }}
           path: sric-core
-          token: ${{ secrets.SENTINEL_FORGE_CI_TOKEN }}
       - uses: actions/checkout@v4
         with:
           repository: IsdarlinM/reprosec
-          ref: ${{ env.SENTINEL_REF }}
+          ref: ${{ env.REPROSEC_CI_REF }}
           path: reprosec
-          token: ${{ secrets.SENTINEL_FORGE_CI_TOKEN }}
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
