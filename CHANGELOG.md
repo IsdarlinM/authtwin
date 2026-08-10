@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.10 - 2026-08-09
+- Adopted signed SRIC Core 0.5.11 and its JSON-safe Web command catalog, preserving AuthTwin `UNKNOWN`/evidence semantics while eliminating opaque catalog serialization failures.
+- Kept normal Linux/Termux/Windows installation atomic and idempotent with no `--force-reinstall`; forced reinstall remains an explicit update/repair action.
+- Installer-internal doctor/capability/help smokes now suppress banners with `SENTINEL_BANNER=never` and print captured diagnostics only on failure.
+- Added exact SRIC pin/lock, quiet-installer and HTTP-200 Console/Workbench catalog regressions.
+
 ## 0.5.9 - 2026-08-09
 - Hardened repair installation so obsolete, incomplete or broken Python environments rebuild only `~/.authtwin/venv`, preserving authorization workspaces, configuration and evidence.
 - Termux now prefers a writable `$PREFIX/bin` already present in `PATH`, making `authtwin` immediately reachable after installation.

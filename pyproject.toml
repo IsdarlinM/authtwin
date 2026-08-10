@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "authtwin"
-version = "0.5.9"
+version = "0.5.10"
 description = "Evidence-native authorization digital twin and invariant analysis."
 readme = "README.md"
 requires-python = ">=3.11"
