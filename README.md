@@ -1,7 +1,7 @@
 # AuthTwin
 
 ```text
-AuthTwin :: v0.5.10
+AuthTwin :: v0.5.11
 Developer: IsdarlinM
 
 Model authorization behavior, invariants, and differential evidence.
@@ -39,6 +39,7 @@ authtwin capabilities
 - exact SRIC version/module compatibility checks in `doctor` and `/api/v1/runtime-compatibility`;
 - full Web Feature Workbench with every public AuthTwin CLI command and argument represented as structured responsive controls;
 - JSON-safe shared Web command catalog generation from SRIC 0.5.11;
+- shared-route CSP that permits same-origin Console/Workbench CSS/JS while retaining restrictive object/base/frame policies;
 - degraded Web mode that preserves the authorization dashboard and reports an actionable 503 if a shared Workbench module is unavailable;
 - advanced Web Command Console with exact public CLI command-tree parity and real-time jobs;
 - professional Rich/Typer terminal presentation with subdued green banner and `--no-color` support.
@@ -81,7 +82,7 @@ python -m pip install 'authtwin[rcap]'
 
 ## CLI presentation
 
-Interactive terminals display a compact subdued-green banner ordered as `AuthTwin :: v0.5.10`, `Developer: IsdarlinM`, then the authorization-modeling purpose statement. Use `authtwin --no-color COMMAND`, `authtwin COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON and redirected stdout remain clean.
+Interactive terminals display a compact subdued-green banner ordered as `AuthTwin :: v0.5.11`, `Developer: IsdarlinM`, then the authorization-modeling purpose statement. Use `authtwin --no-color COMMAND`, `authtwin COMMAND --no-color`, or `NO_COLOR=1` for plain terminal presentation. The banner is emitted to interactive stderr so JSON and redirected stdout remain clean.
 
 The help contract covers `authtwin --help`, `authtwin -h`, `authtwin help`, `authtwin COMMAND --help`, `authtwin COMMAND -h` and `authtwin COMMAND help`.
 
@@ -101,6 +102,8 @@ authtwin web demo
 AuthTwin's native dashboard remains the authorization-focused quick view for matrix, coverage, counterfactual plans, evidence detail, search and jobs. `/workbench` provides **All Features**: every public `authtwin.cli_all` command and every CLI parameter as a structured responsive Web form. `/console` remains the advanced argv-oriented console, and `/api/v1/runtime-compatibility` exposes the shared-runtime diagnostic.
 
 SRIC 0.5.11 normalizes command metadata to deterministic JSON-safe primitives before FastAPI serialization, preventing unusual CLI defaults or Typer metadata from surfacing as an opaque catalog HTTP 500. Shared Web modules are loaded lazily; a stale/corrupt SRIC therefore no longer turns an optional UI import into a global CLI failure.
+
+For `/console` and `/workbench`, AuthTwin overrides the native dashboard CSP with a shared-route policy that explicitly allows `style-src 'self' 'unsafe-inline'` and `script-src 'self'`; this permits the same-origin SRIC stylesheet and script while preserving `object-src 'none'`, `base-uri 'none'` and `frame-ancestors 'none'`.
 
 Execution is not an operating-system shell: the fixed SRIC runner uses `shell=False`, disabled stdin, CSRF protection, redaction, bounded/cancellable jobs and SSE output. AuthTwin evidence semantics and human-controlled validation remain authoritative; a Web invocation cannot turn an unobserved gap into `VALIDATED`.
 
@@ -123,7 +126,7 @@ python -m sric.standalone_gate --root .
 python scripts/release-gate.py
 ```
 
-The 0.5.10 installer regression verifies atomic first-party resolution, signed SRIC 0.5.11 pin/lock, venv-only repair, Termux `$PREFIX/bin`, safe Windows PATH handling, quiet installer smokes and dependency/import/help checks. Web regressions require Console/Workbench catalogs to return HTTP 200 with non-empty command/feature sets and complete CLI/Web coverage. Existing runtime/interface and unit/integration/E2E/security suites continue to cover actors, roles, tenants, authorization matrix, invariants, differential behavior, lifecycle, GraphQL/batch/WebSocket surfaces and `UNKNOWN`/evidence semantics. Destructive operations are gate-tested rather than executed solely for coverage.
+The 0.5.11 Web regression verifies that both shared Web pages return a CSP allowing same-origin styles/scripts and that `/console/styles.css` is reachable. The 0.5.10 installer/catalog regressions remain in force for atomic first-party resolution, signed SRIC 0.5.11 pin/lock, venv-only repair, Termux `$PREFIX/bin`, safe Windows PATH handling, quiet installer smokes, HTTP-200 Console/Workbench catalogs and complete CLI/Web coverage. Existing unit/integration/E2E/security suites continue to cover actors, roles, tenants, authorization matrix, invariants, differential behavior, lifecycle, GraphQL/batch/WebSocket surfaces and `UNKNOWN`/evidence semantics.
 
 Standalone and full release evidence are written below `build/release-evidence/`. A release is complete only when evidence for the exact commit is PASS.
 
