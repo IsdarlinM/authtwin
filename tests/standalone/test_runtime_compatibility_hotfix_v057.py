@@ -18,17 +18,25 @@ def _runtime(version: str, *, compatible: bool, missing: tuple[str, ...] = ()) -
     return bootstrap.SRICRuntimeStatus(version, compatible, missing, (() if compatible else ("incompatible",)))
 
 
-def test_stale_core_and_missing_workbench_are_detected(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(bootstrap.importlib.metadata, "version", lambda _name: "0.5.5")
-    monkeypatch.setattr(bootstrap, "_find_module", lambda _name: False)
+def test_stale_core_and_missing_catalog_are_detected(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(bootstrap.importlib.metadata, "version", lambda _name: "0.5.10")
+    monkeypatch.setattr(
+        bootstrap,
+        "_find_module",
+        lambda name: name in {"sric.web_console", "sric.web_workbench"},
+    )
     result = bootstrap.status()
     assert result.compatible is False
-    assert "sric.web_workbench" in result.missing_modules
-    assert any("older than required 0.5.7" in reason for reason in result.reasons)
+    assert result.missing_modules == ("sric.web_catalog",)
+    assert any("older than required 0.5.11" in reason for reason in result.reasons)
 
 
 def test_bridge_chain_and_same_version_repair_semantics(monkeypatch: pytest.MonkeyPatch) -> None:
-    states = iter([_runtime("0.5.5", compatible=False), _runtime("0.5.7", compatible=True)])
+    states = iter([
+        _runtime("0.5.5", compatible=False),
+        _runtime("0.5.7", compatible=False),
+        _runtime("0.5.11", compatible=True),
+    ])
     bridges: list[str] = []
     updates: list[dict[str, object]] = []
     fake = SimpleNamespace(perform_product_update=lambda **kwargs: updates.append(kwargs))
@@ -40,13 +48,23 @@ def test_bridge_chain_and_same_version_repair_semantics(monkeypatch: pytest.Monk
     monkeypatch.setattr(bootstrap.importlib, "invalidate_caches", lambda: None)
     assert bootstrap.ensure_for_official_update().compatible is True
     assert bridges == ["055-056", "056-057"]
-    assert updates == []
+    assert updates == [
+        {
+            "expected_product": "sric-core",
+            "current_version": "0.5.7",
+            "check_only": False,
+            "force": False,
+        }
+    ]
 
-    states = iter([_runtime("0.5.7", compatible=False, missing=("sric.web_workbench",)), _runtime("0.5.7", compatible=True)])
+    states = iter([
+        _runtime("0.5.11", compatible=False, missing=("sric.web_catalog",)),
+        _runtime("0.5.11", compatible=True),
+    ])
     updates.clear()
     monkeypatch.setattr(bootstrap, "status", lambda: next(states))
     bootstrap.ensure_for_official_update()
-    assert updates == [{"expected_product": "sric-core", "current_version": "0.5.7", "check_only": False, "force": True}]
+    assert updates == [{"expected_product": "sric-core", "current_version": "0.5.11", "check_only": False, "force": True}]
 
 
 def test_degraded_workbench_is_actionable_503() -> None:
