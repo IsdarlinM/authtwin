@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.12 - 2026-08-10
+- Aligned AuthTwin package metadata, runtime lock, bootstrap, `doctor` and Linux/Windows installers to SRIC Core `>=0.5.12,<0.6`.
+- Pinned clean/repair installation to signed SRIC Core main commit `4dd0ad417e55fc76fb67d582ec50234bffff2876` and added `sric.web_runtime` to required integrity checks.
+- Replaced incomplete first-party update bridging with a fixed signed sequential chain from SRIC 0.5.5 through 0.5.12; same-version corrupt 0.5.12 repairs from the fixed signed snapshot.
+- Adopted shared SRIC 0.5.12 operational exception containment, structured catalog 503s, bounded process reaping, SSE-safe terminal-job retention and Job Engine secret redaction without duplicating shared code.
+- Updated installer/runtime regressions for the exact pin/lock/transition chain while retaining exhaustive CLI help/argument-to-Web parity and AuthTwin `UNKNOWN`/evidence semantics.
+
 ## 0.5.11 - 2026-08-09
 - Fixed shared Web asset rendering under the native AuthTwin CSP: `/console` and `/workbench` now explicitly allow same-origin CSS/JS while retaining restrictive object/base/frame policies.
 - Added a regression that checks the actual CSP on both shared Web pages and verifies `/console/styles.css` is reachable.
