@@ -15,7 +15,7 @@ dependencies = [
   "pydantic>=2.10,<3",
   "typer>=0.15,<1",
   "uvicorn>=0.34,<1",
-  "sric-core>=0.5.7,<0.6",
+  "sric-core>=0.5.11,<0.6",
 ]
 
 [project.optional-dependencies]
