@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -9,6 +10,11 @@ from sric.capabilities import discover_capabilities
 from . import __version__
 from .api_vnext import create_app as create_base_app
 from .sric_bootstrap import status as sric_runtime_status
+
+_SHARED_WEB_CSP = (
+    "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
+    "connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"
+)
 
 
 def _mount_degraded_workbench(app: FastAPI, reason: str) -> None:
@@ -33,6 +39,13 @@ def _mount_degraded_workbench(app: FastAPI, reason: str) -> None:
 
 def create_app(workspace: Path) -> FastAPI:
     app = create_base_app(workspace)
+
+    @app.middleware("http")
+    async def shared_web_csp(request: Any, call_next: Any) -> Any:
+        response = await call_next(request)
+        if request.url.path.startswith(("/console", "/workbench")):
+            response.headers["Content-Security-Policy"] = _SHARED_WEB_CSP
+        return response
 
     @app.get("/api/v1/capabilities", tags=["standalone"])
     async def capabilities() -> dict[str, object]:
