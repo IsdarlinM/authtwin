@@ -1,14 +1,11 @@
 from __future__ import annotations
 
 import hashlib
-import json
 import re
 from collections import defaultdict
-from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
 
-from sric.models import ClaimStatus
 
 from .models import (
     ActorResourceBinding,
@@ -26,7 +23,7 @@ SENSITIVE_TERMS = {"email", "phone", "owner", "tenant", "role", "permission", "b
 
 def normalize_endpoint(value: str) -> dict[str, Any]:
     parsed=urlsplit(value if "://" in value else f"https://placeholder{value}")
-    parts=[];identifiers=[]
+    parts=[];identifiers: list[dict[str, Any]]=[]
     for idx,part in enumerate(parsed.path.split("/")):
         if not part: continue
         if _ID_SEGMENT.match(part):
@@ -46,7 +43,7 @@ class AuthorizationIntelligence:
             obs=AuthorizationObservation.model_validate(raw)
             raw_url=obs.metadata.get("url") or obs.metadata.get("url_template")
             if not isinstance(raw_url,str):
-                resource=next((r for r in data["resources"] if r["resource_id"]==obs.resource_id),{})
+                resource: dict[str, Any]=next((r for r in data["resources"] if r["resource_id"]==obs.resource_id),{})
                 raw_url=resource.get("metadata",{}).get("url_template") if isinstance(resource.get("metadata"),dict) else None
             normalized=normalize_endpoint(raw_url) if isinstance(raw_url,str) else {"template":obs.resource_id,"identifiers":[],"host":None}
             key=f"{normalized['host'] or ''}{normalized['template']}"

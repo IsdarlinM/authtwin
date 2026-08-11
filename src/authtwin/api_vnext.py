@@ -7,6 +7,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from .api import create_app as create_base_app
 from .coverage import UnknownAuthorizationCell
+from .coverage import prioritize_unknown_cells
+from .policy_adapters import PolicyProvider, normalize_policy_export
 from .research import build_validation_plan
 from .surfaces import (
     GraphQLFieldObservation,
@@ -33,8 +35,44 @@ class ValidationPlanRequest(BaseModel):
     safe_only: bool = True
 
 
+class PolicyImportRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    provider: PolicyProvider
+    source_id: str
+    data: dict[str, object]
+    evidence_ids: list[str] = Field(default_factory=list)
+
+
+class CoveragePriorityRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    cells: list[UnknownAuthorizationCell]
+
+
 router = APIRouter(prefix="/api/v1/surfaces", tags=["authorization-surfaces"])
 research_router = APIRouter(prefix="/api/v1/research", tags=["authorization-research"])
+policy_router = APIRouter(prefix="/api/v1/policy", tags=["authorization-policy"])
+coverage_router = APIRouter(prefix="/api/v1/coverage", tags=["authorization-coverage"])
+
+
+@policy_router.post("/import")
+async def policy_import(request: PolicyImportRequest) -> dict[str, object]:
+    report = normalize_policy_export(
+        provider=request.provider,
+        source_id=request.source_id,
+        data=request.data,
+        evidence_ids=request.evidence_ids,
+    )
+    return report.model_dump(mode="json")
+
+
+@coverage_router.post("/prioritize")
+async def coverage_prioritize(request: CoveragePriorityRequest) -> dict[str, object]:
+    priorities = prioritize_unknown_cells(request.cells)
+    return {
+        "priorities": [item.model_dump(mode="json") for item in priorities],
+        "risk_score": None,
+        "findings_created": 0,
+    }
 
 
 @router.post("/graphql-fields")
@@ -76,4 +114,6 @@ def create_app(workspace: Path) -> FastAPI:
     app = create_base_app(workspace)
     app.include_router(router)
     app.include_router(research_router)
+    app.include_router(policy_router)
+    app.include_router(coverage_router)
     return app

@@ -583,7 +583,7 @@ def notebook_command(
     root: Path = typer.Option(root_default(), "--root"),
 ) -> None:
     """List/append research notes or manage saved investigation queries."""
-    notebook = ResearchNotebook(wp(workspace, root))
+    notebook = ResearchNotebook(ws_path(workspace, root))
     if save_query_name or query:
         if not (save_query_name and query):
             raise typer.BadParameter("--save-query-name and --query are required together")
@@ -685,6 +685,6 @@ def help_command(ctx: typer.Context, command: Optional[str] = typer.Argument(Non
 
 
 def run() -> None:
-    if len(sys.argv) >= 3 and sys.argv[-1] == "help" and sys.argv[1] != "help":
+    if len(sys.argv) >= 3 and sys.argv[-1] == "help":
         sys.argv[-1] = "--help"
     app()

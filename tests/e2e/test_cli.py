@@ -1,6 +1,5 @@
 from collections.abc import Iterator
 
-import click
 from typer.main import get_command
 from typer.testing import CliRunner
 
@@ -12,14 +11,17 @@ runner = CliRunner()
 def command_paths() -> Iterator[list[str]]:
     root = get_command(app)
 
-    def walk(group: click.Group, prefix: list[str]) -> Iterator[list[str]]:
-        for name, command in sorted(group.commands.items()):
+    def walk(group: object, prefix: list[str]) -> Iterator[list[str]]:
+        commands = getattr(group, "commands", None)
+        if not isinstance(commands, dict):
+            return
+        for name, command in sorted(commands.items()):
             path = [*prefix, name]
             yield path
-            if isinstance(command, click.Group):
+            if isinstance(getattr(command, "commands", None), dict):
                 yield from walk(command, path)
 
-    if isinstance(root, click.Group):
+    if isinstance(getattr(root, "commands", None), dict):
         yield from walk(root, [])
 
 

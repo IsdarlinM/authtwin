@@ -20,7 +20,8 @@ def test_web_console_page_and_safety_contract_are_mounted(tmp_path) -> None:
     client = TestClient(create_app(tmp_path))
     page = client.get("/console")
     assert page.status_code == 200
-    assert "AuthTwin Command Console" in page.text
+    assert "AuthTwin Security Console" in page.text
+    assert 'href="/workbench"' in page.text
     catalog = client.get("/api/v1/console/catalog").json()
     assert catalog["execution"]["shell"] is False
     assert catalog["execution"]["arbitrary_executable"] is False
